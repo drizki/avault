@@ -35,9 +35,9 @@ function AuthCallback() {
         // Just refetch user data and redirect immediately
         await refetch()
         navigate({ to: '/' })
-      } catch (error: any) {
+      } catch (error: unknown) {
         setStatus('error')
-        setErrorMessage(error.message || 'Authentication failed')
+        setErrorMessage(error instanceof Error ? error.message : String(error) || 'Authentication failed')
 
         // Redirect to login after error
         setTimeout(() => {

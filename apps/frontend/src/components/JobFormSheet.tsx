@@ -53,11 +53,25 @@ interface CreatedJob {
   name: string
 }
 
+interface EditJob {
+  id: string
+  name: string
+  sourcePath: string
+  destinationId: string
+  credentialId: string
+  schedule: string
+  retentionType: 'VERSION_COUNT' | 'DAYS' | 'HYBRID'
+  retentionCount?: number
+  retentionDays?: number
+  namePattern?: string
+  enabled: boolean
+}
+
 interface JobFormSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
-  editJob?: any
+  editJob?: EditJob | null
 }
 
 const SCHEDULE_PRESETS = [
@@ -218,6 +232,7 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
   // Filter destinations by selected credential
   const filteredDestinations = formData.credentialId
     ? destinations.filter((d) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dest = d as any
         return dest.credentialId === formData.credentialId || dest.credential?.id === formData.credentialId
       })
@@ -365,7 +380,7 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
                   <Label htmlFor="retentionType">Retention Policy *</Label>
                   <Select
                     value={formData.retentionType}
-                    onValueChange={(value: any) => setFormData({ ...formData, retentionType: value })}
+                    onValueChange={(value: string) => setFormData({ ...formData, retentionType: value as 'VERSION_COUNT' | 'DAYS' | 'HYBRID' })}
                   >
                     <SelectTrigger>
                       <SelectValue />

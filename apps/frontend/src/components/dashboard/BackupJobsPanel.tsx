@@ -257,7 +257,7 @@ export function BackupJobsPanel() {
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         onSuccess={fetchJobs}
-        editJob={editJob}
+        editJob={editJob ? { ...editJob, retentionType: editJob.retentionType as 'VERSION_COUNT' | 'DAYS' | 'HYBRID' } : null}
       />
 
       <DeleteConfirmDialog

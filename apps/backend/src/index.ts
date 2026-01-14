@@ -126,8 +126,8 @@ systemLog.info(`Backend server running at http://localhost:${PORT}`)
 // Start scheduler after server is running
 scheduler.start().then(() => {
   systemLog.info('Backup scheduler started successfully')
-}).catch((err: any) => {
-  systemLog.error('Failed to start backup scheduler', { error: err.message })
+}).catch((err: unknown) => {
+  systemLog.error('Failed to start backup scheduler', { error: err instanceof Error ? err.message : 'Unknown error' })
 })
 
 // Note: Log cleanup is scheduled by the cleanup-worker process
@@ -141,7 +141,7 @@ const shutdown = async () => {
   try {
     await scheduler.stop()
     logger.info('Scheduler stopped')
-  } catch (error) {
+  } catch {
     logger.warn('Scheduler already stopped or not initialized')
   }
 
@@ -149,7 +149,7 @@ const shutdown = async () => {
   try {
     const { closeQueue } = await import('./lib/queue')
     await closeQueue()
-  } catch (error) {
+  } catch {
     logger.warn('Queue not initialized or already closed')
   }
 

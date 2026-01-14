@@ -114,7 +114,9 @@ describe('nas routes', () => {
 
     it('returns 403 on permission denied', async () => {
       mocks.fsAccess.mockResolvedValue(undefined)
-      mocks.fsReaddir.mockRejectedValue({ code: 'EACCES', message: 'Permission denied' })
+      const err = new Error('Permission denied') as NodeJS.ErrnoException
+      err.code = 'EACCES'
+      mocks.fsReaddir.mockRejectedValue(err)
 
       const res = await app.request('/api/nas/browse?path=/')
 

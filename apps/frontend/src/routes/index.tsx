@@ -50,6 +50,7 @@ interface LogEvent {
   timestamp: string
   level: 'info' | 'error' | 'warn' | 'debug'
   message: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>
 }
 

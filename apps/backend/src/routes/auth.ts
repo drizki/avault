@@ -1,9 +1,9 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { setCookie, deleteCookie } from 'hono/cookie'
 import crypto from 'crypto'
 import { getRedis, encrypt } from '@avault/shared'
 import { GoogleOAuthClient } from '../lib/auth/google'
-import { generateToken, verifyToken, getTokenFromCookie } from '../lib/auth/jwt'
+import { generateToken, getTokenFromCookie } from '../lib/auth/jwt'
 import { SettingsService } from '../lib/settings'
 import { requireAuth } from '../middleware/auth'
 import type { Env } from '../index'
@@ -54,7 +54,7 @@ auth.post('/login/google', async (c) => {
         state,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to initialize Google OAuth')
     return c.json({
       success: false,
@@ -66,16 +66,17 @@ auth.post('/login/google', async (c) => {
 /**
  * Handle credential OAuth callback (for adding storage credentials)
  */
-async function handleCredentialOAuthCallback(c: any, code: string, decodedState: any) {
+async function handleCredentialOAuthCallback(c: Context<Env>, code: string, decodedState: Record<string, unknown>) {
   const db = c.get('db')
-  const { userId, provider } = decodedState
+  const userId = typeof decodedState.userId === 'string' ? decodedState.userId : null
+  const provider = typeof decodedState.provider === 'string' ? decodedState.provider : undefined
 
   if (!userId) {
     return c.redirect(`${process.env.FRONTEND_URL}/credentials?error=invalid_state`)
   }
 
   // Determine the storage provider type (default to google_drive_shared for backwards compatibility)
-  const storageProvider = provider || 'google_drive_shared'
+  const storageProvider = (provider as string) || 'google_drive_shared'
 
   // Get friendly provider name for display
   const providerDisplayName = storageProvider === 'google_drive_my_drive'
@@ -121,8 +122,8 @@ async function handleCredentialOAuthCallback(c: any, code: string, decodedState:
     logger.info({ userId, email: googleUser.email, provider: storageProvider }, 'Google Drive credential added successfully')
 
     return c.redirect(`${process.env.FRONTEND_URL}/credentials?success=credential_added`)
-  } catch (error: any) {
-    logger.error({ error: error.message, provider: storageProvider }, 'Failed to process Google Drive OAuth callback')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), provider: storageProvider }, 'Failed to process Google Drive OAuth callback')
     return c.redirect(`${process.env.FRONTEND_URL}/credentials?error=oauth_failed`)
   }
 }
@@ -196,7 +197,7 @@ auth.get('/callback/google', async (c) => {
     // Determine role (only for new users)
     const userCount = await db.user.count()
     const isFirstUser = userCount === 0
-    let role: 'ADMIN' | 'USER' = isFirstUser ? 'ADMIN' : 'USER'
+    const role: 'ADMIN' | 'USER' = isFirstUser ? 'ADMIN' : 'USER'
 
     // Create or update user
     const user = await db.user.upsert({
@@ -247,7 +248,7 @@ auth.get('/callback/google', async (c) => {
 
     // Redirect to frontend dashboard
     return c.redirect(`${process.env.FRONTEND_URL}/auth/callback?success=true`)
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'OAuth callback error')
     return c.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`)
   }
@@ -301,7 +302,7 @@ auth.get('/me', requireAuth, async (c) => {
       success: true,
       data: user,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to fetch user')
     return c.json({
       success: false,
@@ -331,7 +332,7 @@ auth.get('/status', async (c) => {
         allowSignups,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to get auth status')
     return c.json({
       success: false,

@@ -16,11 +16,12 @@ queue.get('/status', async (c) => {
       success: true,
       data: stats,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     return c.json({
       success: false,
       error: 'Failed to get queue status',
-      details: error.message,
+      details: message,
     }, 500)
   }
 })

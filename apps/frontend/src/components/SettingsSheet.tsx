@@ -51,7 +51,7 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
       if (res.success && res.data) {
         setAllowSignups(res.data.value)
       }
-    } catch (error) {
+    } catch {
       // Settings may not be accessible for non-admin users
     }
     setIsFetching(false)

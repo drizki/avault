@@ -307,6 +307,7 @@ export function FolderTree({
           throw new Error(response.error)
         }
       } else if (type === 'cloud' && credentialId && destinationId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any[]>(
           `/destinations/browse/${credentialId}/${destinationId}/folders`
         )
@@ -323,9 +324,9 @@ export function FolderTree({
           setRootNodes(dirs)
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch folders:', err)
-      setError(err.message || 'Failed to load folders')
+      setError(err instanceof Error ? err.message : String(err) || 'Failed to load folders')
     } finally {
       setLoading(false)
     }
@@ -356,6 +357,7 @@ export function FolderTree({
           return { children: [], error: response.error }
         }
       } else if (type === 'cloud' && credentialId && destinationId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any[]>(
           `/destinations/browse/${credentialId}/${destinationId}/folders?parentFolderId=${node.id}`
         )
@@ -375,9 +377,9 @@ export function FolderTree({
           return { children: [], error: response.error }
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch children:', err)
-      return { children: [], error: err.message }
+      return { children: [], error: err instanceof Error ? err.message : String(err) }
     }
     return { children: [] }
   }, [type, credentialId, destinationId])
@@ -460,6 +462,7 @@ export function FolderTree({
 
     setIsCreating(true)
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await api.post<any>(
         `/destinations/browse/${credentialId}/${destinationId}/folders`,
         {

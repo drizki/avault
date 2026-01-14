@@ -53,16 +53,20 @@ export function HistoryChart() {
   }
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = (_props: unknown) => {
+    const { active, payload, label } = _props as { active?: boolean; payload?: Array<{ color: string; name: string; value: number }>; label?: string }
     if (active && payload && payload.length) {
       return (
         <div className="bg-card border border-border p-2 text-xs">
-          <p className="font-medium mb-1">{formatDate(label)}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }}>
-              {entry.name}: {entry.value}
-            </p>
-          ))}
+          <p className="font-medium mb-1">{label ? formatDate(label) : ''}</p>
+          {payload.map((entry: unknown, index: number) => {
+            const e = entry as { color: string; name: string; value: number }
+            return (
+              <p key={index} style={{ color: e.color }}>
+                {e.name}: {e.value}
+              </p>
+            )
+          })}
         </div>
       )
     }

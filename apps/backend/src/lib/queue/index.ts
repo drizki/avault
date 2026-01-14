@@ -1,4 +1,4 @@
-import { Queue, QueueEvents } from 'bullmq'
+import { Queue, QueueEvents, type JobsOptions } from 'bullmq'
 import { createRedisConnection, logger, type BackupJobData } from '@avault/shared'
 
 // BullMQ requires its own dedicated Redis connection for proper lifecycle management
@@ -30,13 +30,14 @@ queueEvents.on('failed', ({ jobId, failedReason }) => {
 })
 
 // Helper function to add a job to the queue
-export async function queueBackupJob(data: BackupJobData, opts?: any) {
+export async function queueBackupJob(data: BackupJobData, opts?: JobsOptions) {
   try {
     const job = await backupQueue.add('backup', data, opts)
     logger.info({ jobId: data.jobId, queueJobId: job.id }, 'Backup job added to queue')
     return job
-  } catch (error: any) {
-    logger.error({ error: error.message, jobId: data.jobId }, 'Failed to queue backup job')
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message, jobId: data.jobId }, 'Failed to queue backup job')
     throw error
   }
 }
@@ -87,9 +88,10 @@ export async function cancelQueueJob(queueJobId: string) {
     }
 
     return { success: true, state }
-  } catch (error: any) {
-    logger.error({ error: error.message, queueJobId }, 'Failed to cancel job')
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message, queueJobId }, 'Failed to cancel job')
+    return { success: false, error: message }
   }
 }
 
@@ -121,8 +123,9 @@ export async function findQueueJobByHistoryId(historyId: string) {
     }
 
     return null
-  } catch (error: any) {
-    logger.error({ error: error.message, historyId }, 'Failed to find job')
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message, historyId }, 'Failed to find job')
     return null
   }
 }
@@ -138,8 +141,9 @@ export async function getActiveJobs() {
       progress: job.progress,
       timestamp: job.timestamp,
     }))
-  } catch (error: any) {
-    logger.error({ error: error.message }, 'Failed to get active jobs')
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message }, 'Failed to get active jobs')
     return []
   }
 }
@@ -162,9 +166,10 @@ export async function cleanupStuckJobs(maxAgeMinutes: number = 60) {
     }
 
     return { cleanedCount, checkedCount: activeJobs.length }
-  } catch (error: any) {
-    logger.error({ error: error.message }, 'Failed to cleanup stuck jobs')
-    return { cleanedCount: 0, checkedCount: 0, error: error.message }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message }, 'Failed to cleanup stuck jobs')
+    return { cleanedCount: 0, checkedCount: 0, error: message }
   }
 }
 

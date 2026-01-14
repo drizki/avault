@@ -47,8 +47,8 @@ function Login() {
       setIsLoading(true)
       setError('')
       await login()
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err) || 'Failed to sign in')
       setIsLoading(false)
     }
   }

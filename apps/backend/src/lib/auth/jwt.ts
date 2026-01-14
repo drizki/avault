@@ -44,7 +44,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET)
     return payload as unknown as JWTPayload
-  } catch (error) {
+  } catch {
     // Token is invalid or expired
     return null
   }

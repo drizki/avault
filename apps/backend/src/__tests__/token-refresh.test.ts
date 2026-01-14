@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { encrypt } from '@avault/shared'
 
@@ -16,7 +17,6 @@ vi.mock('googleapis', () => ({
   },
 }))
 
-import { google } from 'googleapis'
 import { getValidGoogleTokens } from '../lib/auth/token-refresh'
 
 describe('token-refresh', () => {

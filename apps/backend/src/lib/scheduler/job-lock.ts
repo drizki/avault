@@ -32,9 +32,10 @@ export async function acquireJobLock(
 
     logger.debug({ jobId }, 'Job already locked by another instance')
     return false
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     logger.error(
-      { error: error.message, jobId },
+      { error: message, jobId },
       'Error acquiring job lock'
     )
     return false
@@ -55,9 +56,10 @@ export async function releaseJobLock(
     const lockKey = `${LOCK_PREFIX}${jobId}`
     await redis.del(lockKey)
     logger.debug({ jobId }, 'Job lock released')
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     logger.error(
-      { error: error.message, jobId },
+      { error: message, jobId },
       'Error releasing job lock'
     )
   }
@@ -78,9 +80,10 @@ export async function isJobLocked(
     const lockKey = `${LOCK_PREFIX}${jobId}`
     const exists = await redis.exists(lockKey)
     return exists === 1
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     logger.error(
-      { error: error.message, jobId },
+      { error: message, jobId },
       'Error checking job lock'
     )
     return false

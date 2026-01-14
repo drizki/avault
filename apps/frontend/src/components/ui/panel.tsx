@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {}
+type PanelProps = React.HTMLAttributes<HTMLDivElement>
 
 const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
   ({ className, children, ...props }, ref) => {

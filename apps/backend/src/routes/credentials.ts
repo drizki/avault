@@ -12,6 +12,7 @@ credentials.use('*', requireAuth)
 // List all credentials (filtered by user)
 credentials.get('/', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   const allCredentials = await db.storageCredential.findMany({
@@ -37,6 +38,7 @@ credentials.get('/', async (c) => {
 // Get single credential (user's own only)
 credentials.get('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -62,6 +64,7 @@ credentials.get('/:id', async (c) => {
 // Delete credential (user's own only)
 credentials.delete('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -84,7 +87,7 @@ credentials.delete('/:id', async (c) => {
       success: true,
       message: 'Credential deleted successfully',
     })
-  } catch (error) {
+  } catch {
     return c.json({
       success: false,
       error: 'Failed to delete credential',
@@ -98,6 +101,7 @@ credentials.delete('/:id', async (c) => {
 
 // Initiate Google Drive OAuth flow (supports both Shared Drives and My Drive)
 credentials.post('/google-drive/auth', async (c) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -133,8 +137,8 @@ credentials.post('/google-drive/auth', async (c) => {
       success: true,
       data: { authUrl, state },
     })
-  } catch (error: any) {
-    logger.error({ error: error.message, userId }, 'Failed to initiate Google Drive OAuth')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), userId }, 'Failed to initiate Google Drive OAuth')
     return c.json({
       success: false,
       error: 'Failed to initiate OAuth flow',
@@ -148,6 +152,7 @@ credentials.post('/google-drive/auth', async (c) => {
 
 // Create credential from API keys
 credentials.post('/api-key', async (c) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const db = c.get('db')
 
@@ -207,12 +212,12 @@ credentials.post('/api-key', async (c) => {
       success: true,
       data: credential,
     }, 201)
-  } catch (error: any) {
-    logger.error({ error: error.message, userId }, 'Failed to create API key credential')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), userId }, 'Failed to create API key credential')
     return c.json({
       success: false,
       error: 'Failed to create credential',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })
@@ -223,6 +228,7 @@ credentials.post('/api-key', async (c) => {
 
 // Create credential from service account JSON
 credentials.post('/service-account', async (c) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const db = c.get('db')
 
@@ -288,12 +294,12 @@ credentials.post('/service-account', async (c) => {
       success: true,
       data: credential,
     }, 201)
-  } catch (error: any) {
-    logger.error({ error: error.message, userId }, 'Failed to create service account credential')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), userId }, 'Failed to create service account credential')
     return c.json({
       success: false,
       error: 'Failed to create credential',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })

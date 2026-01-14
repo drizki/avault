@@ -13,6 +13,7 @@ destinations.use('*', requireAuth)
 // List all destinations (filtered by user)
 destinations.get('/', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   const allDestinations = await db.storageDestination.findMany({
@@ -35,6 +36,7 @@ destinations.get('/', async (c) => {
 // Create destination (attach userId)
 destinations.post('/', zValidator('json', CreateDestinationSchema), async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const data = c.req.valid('json')
 
@@ -56,11 +58,11 @@ destinations.post('/', zValidator('json', CreateDestinationSchema), async (c) =>
     })
 
     return c.json({ success: true, data: destination }, 201)
-  } catch (error: any) {
+  } catch (error: unknown) {
     return c.json({
       success: false,
       error: 'Failed to create destination',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 400)
   }
 })
@@ -68,6 +70,7 @@ destinations.post('/', zValidator('json', CreateDestinationSchema), async (c) =>
 // Get single destination (user's own only)
 destinations.get('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -94,6 +97,7 @@ destinations.get('/:id', async (c) => {
 // Update destination (user's own only)
 destinations.patch('/:id', zValidator('json', UpdateDestinationSchema), async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
   const data = c.req.valid('json')
@@ -126,7 +130,7 @@ destinations.patch('/:id', zValidator('json', UpdateDestinationSchema), async (c
     })
 
     return c.json({ success: true, data: destination })
-  } catch (error) {
+  } catch {
     return c.json({
       success: false,
       error: 'Failed to update destination',
@@ -137,6 +141,7 @@ destinations.patch('/:id', zValidator('json', UpdateDestinationSchema), async (c
 // Delete destination (user's own only)
 destinations.delete('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -159,7 +164,7 @@ destinations.delete('/:id', async (c) => {
       success: true,
       message: 'Destination deleted successfully',
     })
-  } catch (error) {
+  } catch {
     return c.json({
       success: false,
       error: 'Failed to delete destination',
@@ -174,6 +179,7 @@ destinations.delete('/:id', async (c) => {
 // Create a new Shared Drive (Google Drive only)
 destinations.post('/create-drive/:credentialId', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const credentialId = c.req.param('credentialId')
 
@@ -233,12 +239,12 @@ destinations.post('/create-drive/:credentialId', async (c) => {
       success: true,
       data: newDrive,
     }, 201)
-  } catch (error: any) {
-    logger.error({ error: error.message, stack: error.stack, credentialId }, 'Failed to create Shared Drive')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined, credentialId }, 'Failed to create Shared Drive')
     return c.json({
       success: false,
       error: 'Failed to create Shared Drive',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })
@@ -246,6 +252,7 @@ destinations.post('/create-drive/:credentialId', async (c) => {
 // List available destinations for a credential (e.g., Google Drive Shared Drives)
 destinations.get('/browse/:credentialId', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const credentialId = c.req.param('credentialId')
 
@@ -292,20 +299,20 @@ destinations.get('/browse/:credentialId', async (c) => {
         success: true,
         data: availableDestinations,
       })
-    } catch (adapterError: any) {
-      logger.error({ error: adapterError.message, provider: credential.provider }, 'Failed to initialize adapter')
+    } catch (adapterError: unknown) {
+      logger.error({ error: adapterError instanceof Error ? adapterError.message : String(adapterError), provider: credential.provider }, 'Failed to initialize adapter')
       return c.json({
         success: false,
         error: `Provider ${credential.provider} not supported for browsing`,
-        details: adapterError.message,
+        details: adapterError instanceof Error ? adapterError.message : String(adapterError),
       }, 400)
     }
-  } catch (error: any) {
-    logger.error({ error: error.message, stack: error.stack, credentialId }, 'Failed to browse destinations')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined, credentialId }, 'Failed to browse destinations')
     return c.json({
       success: false,
       error: 'Failed to list available destinations',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })
@@ -313,6 +320,7 @@ destinations.get('/browse/:credentialId', async (c) => {
 // Browse folders within a destination (e.g., folders inside a Shared Drive)
 destinations.get('/browse/:credentialId/:destinationId/folders', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const credentialId = c.req.param('credentialId')
   const destinationId = c.req.param('destinationId')
@@ -350,19 +358,19 @@ destinations.get('/browse/:credentialId/:destinationId/folders', async (c) => {
         success: true,
         data: folders,
       })
-    } catch (adapterError: any) {
+    } catch (adapterError: unknown) {
       return c.json({
         success: false,
         error: `Provider ${credential.provider} not supported for folder browsing`,
-        details: adapterError.message,
+        details: adapterError instanceof Error ? adapterError.message : String(adapterError),
       }, 400)
     }
-  } catch (error: any) {
-    logger.error({ error: error.message, credentialId, destinationId }, 'Failed to browse folders')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), credentialId, destinationId }, 'Failed to browse folders')
     return c.json({
       success: false,
       error: 'Failed to list folders',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })
@@ -370,6 +378,7 @@ destinations.get('/browse/:credentialId/:destinationId/folders', async (c) => {
 // Create a new folder in a destination
 destinations.post('/browse/:credentialId/:destinationId/folders', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const credentialId = c.req.param('credentialId')
   const destinationId = c.req.param('destinationId')
@@ -415,19 +424,19 @@ destinations.post('/browse/:credentialId/:destinationId/folders', async (c) => {
         success: true,
         data: folder,
       }, 201)
-    } catch (adapterError: any) {
+    } catch (adapterError: unknown) {
       return c.json({
         success: false,
         error: `Provider ${credential.provider} not supported for folder creation`,
-        details: adapterError.message,
+        details: adapterError instanceof Error ? adapterError.message : String(adapterError),
       }, 400)
     }
-  } catch (error: any) {
-    logger.error({ error: error.message, credentialId, destinationId }, 'Failed to create folder')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), credentialId, destinationId }, 'Failed to create folder')
     return c.json({
       success: false,
       error: 'Failed to create folder',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })

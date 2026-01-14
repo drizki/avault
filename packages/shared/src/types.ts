@@ -11,6 +11,7 @@ export interface SystemStatus {
 
 export interface Setting {
   key: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any
   updatedAt: Date
   updatedBy: string | null
@@ -43,6 +44,7 @@ export interface IStorageAdapter {
   provider: string
 
   // Initialize the adapter with credentials
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialize(credentials: any): Promise<void>
 
   // List available destinations (drives, buckets, etc.)
@@ -76,6 +78,7 @@ export interface StorageDestinationInfo {
   id: string
   name: string
   provider: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>
 }
 
@@ -167,6 +170,7 @@ export interface BackupExecutionResult {
 // Encryption utilities types (EncryptedData is exported from crypto.ts)
 export interface DecryptedCredentials {
   provider: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
   expiresAt?: Date
 }
@@ -179,6 +183,7 @@ export type WebSocketEventType =
   | 'backup:error'
   | 'queue:stats'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface WebSocketEvent<T = any> {
   type: WebSocketEventType
   payload: T
@@ -205,6 +210,7 @@ export interface BackupJobProgress {
 }
 
 // API types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface APISuccessResponse<T = any> {
   success: true
   data?: T
@@ -214,9 +220,11 @@ export interface APISuccessResponse<T = any> {
 export interface APIErrorResponse {
   success: false
   error: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type APIResponse<T = any> = APISuccessResponse<T> | APIErrorResponse
 
 export interface PaginatedResponse<T> {

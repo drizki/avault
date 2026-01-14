@@ -23,7 +23,7 @@ interface AvailableDestination {
   id: string
   name: string
   provider: string
-  metadata?: any
+  metadata?: unknown
 }
 
 interface DestinationFormSheetProps {

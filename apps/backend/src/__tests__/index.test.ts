@@ -76,6 +76,7 @@ vi.mock('../lib/queue', () => ({
 }))
 
 // Store app reference for reuse
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let app: any
 
 describe('backend entry point', () => {

@@ -13,7 +13,7 @@ import { createLogPublisher } from './lib/log-stream'
 import pLimit from 'p-limit'
 
 const NAS_MOUNT_PATH = process.env.NAS_MOUNT_PATH || ''
-const TEMP_DIR = process.env.TEMP_DIR || '/tmp/avault-backups'
+const _TEMP_DIR = process.env.TEMP_DIR || '/tmp/avault-backups'
 
 // Upload performance configuration
 const CONCURRENT_UPLOADS = parseInt(process.env.CONCURRENT_UPLOADS || '10', 10)
@@ -200,11 +200,11 @@ export async function executeBackupJob(
           }
 
           return { success: true, path: relativePath }
-        } catch (error: any) {
+        } catch (error: unknown) {
           failedFiles++
-          logger.error({ file: fileInfo.path, error: error.message }, 'Failed to upload file')
-          logStream.error(`Error: Failed to upload: ${relativePath} - ${error.message}`)
-          return { success: false, path: relativePath, error: error.message }
+          logger.error({ file: fileInfo.path, error: error instanceof Error ? error.message : String(error) }, 'Failed to upload file')
+          logStream.error(`Error: Failed to upload: ${relativePath} - ${error instanceof Error ? error.message : String(error)}`)
+          return { success: false, path: relativePath, error: error instanceof Error ? error.message : String(error) }
         }
       })
     )
@@ -246,11 +246,13 @@ export async function executeBackupJob(
     result.duration = Date.now() - startTime
 
     return result
-  } catch (error: any) {
-    logger.error({ error: error.message, stack: error.stack }, 'Backup job failed')
-    logStream.error(`Backup failed: ${error.message}`)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+    logger.error({ error: errorMessage, stack: errorStack }, 'Backup job failed')
+    logStream.error(`Backup failed: ${errorMessage}`)
     result.duration = Date.now() - startTime
-    result.error = error.message
+    result.error = errorMessage
     return result
   }
 }
@@ -289,6 +291,7 @@ const OS_JUNK_DIRECTORIES = new Set([
   'System Volume Information', // Windows System
 ])
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function scanDirectoryWithDetails(dirPath: string, logStream: any): Promise<FileInfo[]> {
   const files: FileInfo[] = []
   let skippedCount = 0
@@ -323,13 +326,13 @@ async function scanDirectoryWithDetails(dirPath: string, logStream: any): Promis
               path: fullPath,
               size: stats.size,
             })
-          } catch (error: any) {
-            logger.error({ path: fullPath, error: error.message }, 'Error getting file stats')
+          } catch (error: unknown) {
+            logger.error({ path: fullPath, error: error instanceof Error ? error.message : String(error) }, 'Error getting file stats')
           }
         }
       }
-    } catch (error: any) {
-      logger.error({ path: currentPath, error: error.message }, 'Error scanning directory')
+    } catch (error: unknown) {
+      logger.error({ path: currentPath, error: error instanceof Error ? error.message : String(error) }, 'Error scanning directory')
     }
   }
 
@@ -374,6 +377,7 @@ async function applyRetentionPolicy(
   adapter: StorageAdapter,
   destinationId: string,
   policy: { type: 'VERSION_COUNT' | 'DAYS' | 'HYBRID'; count?: number; days?: number },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logStream: any
 ): Promise<void> {
   try {
@@ -438,8 +442,8 @@ async function applyRetentionPolicy(
           await adapter.deleteFolder(destinationId, backupPath)
           logger.info({ backupPath }, 'Deleted old backup')
           logStream.info(`Deleted old backup: ${backupPath}`)
-        } catch (error: any) {
-          logger.error({ backupPath, error: error.message }, 'Failed to delete old backup')
+        } catch (error: unknown) {
+          logger.error({ backupPath, error: error instanceof Error ? error.message : String(error) }, 'Failed to delete old backup')
           logStream.error(`Error: Failed to delete backup: ${backupPath}`)
         }
       }
@@ -447,9 +451,9 @@ async function applyRetentionPolicy(
       logger.info('No backups to delete')
       logStream.info('No old backups to delete')
     }
-  } catch (error: any) {
-    logger.error({ error: error.message }, 'Failed to apply retention policy')
-    logStream.error(`Error: Retention policy error: ${error.message}`)
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Failed to apply retention policy')
+    logStream.error(`Error: Retention policy error: ${error instanceof Error ? error.message : String(error)}`)
     // Don't throw - retention failure shouldn't fail the entire backup
   }
 }

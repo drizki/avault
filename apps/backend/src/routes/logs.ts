@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
-import { logger, createRedisConnection, Redis } from '@avault/shared'
+import { logger, Redis } from '@avault/shared'
 import { verifyToken } from '../lib/auth/jwt'
 import { requireAuth } from '../middleware/auth'
 import type { Env } from '../index'
@@ -265,6 +265,7 @@ logs.get('/:historyId', async (c) => {
 // Delete all logs for the authenticated user
 logs.delete('/', requireAuth, async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -276,7 +277,7 @@ logs.delete('/', requireAuth, async (c) => {
       success: true,
       data: { deletedCount: result.count },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ err: error }, 'Failed to delete logs')
     return c.json({ success: false, error: 'Failed to delete logs' }, 500)
   }

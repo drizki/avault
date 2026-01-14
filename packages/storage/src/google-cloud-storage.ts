@@ -74,12 +74,6 @@ export class GoogleCloudStorageAdapter extends StorageAdapter {
     const bucket = this.storage.bucket(bucketName)
     const normalizedPrefix = prefix ? (prefix.endsWith('/') ? prefix : `${prefix}/`) : ''
 
-    const [files] = await bucket.getFiles({
-      prefix: normalizedPrefix,
-      delimiter: '/',
-      autoPaginate: false,
-    })
-
     // GCS returns prefixes in the apiResponse, not in files array for delimiter queries
     const [, , apiResponse] = await bucket.getFiles({
       prefix: normalizedPrefix,

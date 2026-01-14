@@ -24,7 +24,7 @@ settings.get('/', async (c) => {
       success: true,
       data: allSettings,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to fetch settings')
     return c.json({
       success: false,
@@ -59,7 +59,7 @@ settings.get('/:key', async (c) => {
         value,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to fetch setting')
     return c.json({
       success: false,
@@ -98,7 +98,7 @@ settings.put('/:key', async (c) => {
         value,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to update setting')
     return c.json({
       success: false,

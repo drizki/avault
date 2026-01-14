@@ -1,17 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { Hono } from 'hono'
+import type { Env } from '../index'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ApiResponse = { success: boolean; data?: any; error?: string }
 
 import providersRoutes from '../routes/providers'
 
 describe('providers routes', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let app: Hono<any>
+  let app: Hono<Env>
 
   beforeEach(() => {
-    app = new Hono()
+    app = new Hono<Env>()
     app.route('/api/providers', providersRoutes)
   })
 

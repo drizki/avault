@@ -17,6 +17,9 @@ interface FolderItem {
   id?: string
   name: string
   path: string
+  type?: 'directory' | 'file'
+  size?: number
+  modified?: Date
 }
 
 interface FolderPickerProps {
@@ -82,8 +85,8 @@ export function FolderPicker({
         if (response.success && response.data) {
           // Filter only directories
           const dirs = response.data.items
-            .filter((item: any) => item.type === 'directory')
-            .map((item: any) => ({
+            .filter((item: FolderItem) => item.type === 'directory')
+            .map((item: FolderItem) => ({
               name: item.name,
               path: item.path,
             }))
@@ -100,9 +103,9 @@ export function FolderPicker({
           setFolders(response.data)
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch folders:', err)
-      setError(err.message || 'Failed to load folders')
+      setError(err instanceof Error ? err.message : String(err) || 'Failed to load folders')
     } finally {
       setLoading(false)
     }
@@ -124,15 +127,15 @@ export function FolderPicker({
         const response = await api.get<{ items: FolderItem[] }>(`/nas/browse?path=${encodeURIComponent(folder.path)}`)
         if (response.success && response.data) {
           const dirs = response.data.items
-            .filter((item: any) => item.type === 'directory')
-            .map((item: any) => ({
+            .filter((item: FolderItem) => item.type === 'directory')
+            .map((item: FolderItem) => ({
               name: item.name,
               path: item.path,
             }))
           setFolders(dirs)
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load folders')
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : String(err) || 'Failed to load folders')
       } finally {
         setLoading(false)
       }
@@ -154,15 +157,15 @@ export function FolderPicker({
         .then(response => {
           if (response.success && response.data) {
             const dirs = response.data.items
-              .filter((item: any) => item.type === 'directory')
-              .map((item: any) => ({
+              .filter((item: FolderItem) => item.type === 'directory')
+              .map((item: FolderItem) => ({
                 name: item.name,
                 path: item.path,
               }))
             setFolders(dirs)
           }
         })
-        .catch(err => setError(err.message))
+        .catch(err => setError(err instanceof Error ? err.message : String(err)))
         .finally(() => setLoading(false))
     } else {
       fetchFolders(targetBreadcrumb?.folderId)
@@ -186,7 +189,7 @@ export function FolderPicker({
         setNewFolderName('')
         setShowCreateInput(false)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to create folder:', err)
     } finally {
       setCreating(false)

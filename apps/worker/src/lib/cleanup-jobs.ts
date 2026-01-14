@@ -31,8 +31,8 @@ export async function scheduleLogCleanup() {
     )
 
     logger.info('Scheduled daily log cleanup job (2 AM)')
-  } catch (error: any) {
-    logger.error({ error: error.message }, 'Failed to schedule log cleanup')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Failed to schedule log cleanup')
     throw error
   }
 }
@@ -59,8 +59,8 @@ export async function executeLogCleanup(db: PrismaClient): Promise<number> {
 
     logger.info({ deletedCount: result.count }, 'Log cleanup completed')
     return result.count
-  } catch (error: any) {
-    logger.error({ error: error.message }, 'Log cleanup failed')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Log cleanup failed')
     throw error
   }
 }

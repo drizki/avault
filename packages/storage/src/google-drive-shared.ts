@@ -62,7 +62,9 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     })
 
     return (response.data.drives || []).map((drive) => ({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       id: drive.id!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       name: drive.name!,
       provider: this.provider,
       metadata: {
@@ -87,7 +89,9 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     })
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       id: response.data.id!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       name: response.data.name!,
       provider: this.provider,
       metadata: {
@@ -114,8 +118,11 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     })
 
     return (response.data.files || []).map((folder) => ({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       id: folder.id!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       name: folder.name!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       path: folder.name!,
       createdTime: folder.createdTime ? new Date(folder.createdTime) : undefined,
       modifiedTime: folder.modifiedTime ? new Date(folder.modifiedTime) : undefined,
@@ -174,6 +181,7 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
         parentId = rootFolderId
       } else {
         const parentCacheKey = `${destinationId}:${rootFolderName}/${parentPath}`
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         parentId = this.folderCache.get(parentCacheKey)!
         if (!parentId) {
           throw new Error(`Parent folder not found in cache: ${parentPath}`)
@@ -192,6 +200,7 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
 
       let folderId: string
       if (existingFolder.data.files && existingFolder.data.files.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         folderId = existingFolder.data.files[0].id!
       } else {
         // Create folder
@@ -205,6 +214,7 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
           supportsAllDrives: true,
           fields: 'id, name',
         })
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         folderId = newFolder.data.id!
       }
 
@@ -254,6 +264,7 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
       }
 
       // Create nested folders if needed
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       let currentParentId = rootFolder.id!
       for (const dirName of directories) {
         const existingFolder = await this.drive.files.list({
@@ -266,6 +277,7 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
         })
 
         if (existingFolder.data.files && existingFolder.data.files.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           currentParentId = existingFolder.data.files[0].id!
         } else {
           const newFolder = await this.drive.files.create({
@@ -277,6 +289,7 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
             supportsAllDrives: true,
             fields: 'id, name',
           })
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           currentParentId = newFolder.data.id!
         }
       }
@@ -320,7 +333,9 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     })
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       fileId: response.data.id!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       fileName: response.data.name!,
       size: parseInt(response.data.size || '0'),
       path: `${params.folderPath}/${params.fileName}`,
@@ -343,10 +358,14 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     })
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       id: response.data.id!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       name: response.data.name!,
       path: name,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       createdTime: new Date(response.data.createdTime!),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       modifiedTime: new Date(response.data.modifiedTime!),
     }
   }
@@ -373,6 +392,7 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     }
 
     await this.drive.files.delete({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       fileId: folder.id!,
       supportsAllDrives: true,
     })
@@ -392,8 +412,11 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     })
 
     return (response.data.files || []).map((folder) => ({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       name: folder.name!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       path: folder.name!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       createdTime: new Date(folder.createdTime!),
       size: folder.size ? parseInt(folder.size) : undefined,
     }))

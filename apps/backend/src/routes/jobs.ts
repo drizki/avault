@@ -15,6 +15,7 @@ jobs.use('*', requireAuth)
 // List all backup jobs (filtered by user)
 jobs.get('/', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   const allJobs = await db.backupJob.findMany({
@@ -53,11 +54,11 @@ jobs.get('/queue/active', async (c) => {
   try {
     const activeJobs = await getActiveJobs()
     return c.json({ success: true, data: activeJobs })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return c.json({
       success: false,
       error: 'Failed to get active jobs',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })
@@ -73,11 +74,11 @@ jobs.post('/queue/cleanup', async (c) => {
       data: result,
       message: `Cleaned up ${result.cleanedCount} stuck jobs out of ${result.checkedCount} active jobs`,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return c.json({
       success: false,
       error: 'Failed to cleanup stuck jobs',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })
@@ -85,6 +86,7 @@ jobs.post('/queue/cleanup', async (c) => {
 // Cancel a running or pending backup job
 jobs.post('/history/:historyId/cancel', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const historyId = c.req.param('historyId')
 
@@ -118,6 +120,7 @@ jobs.post('/history/:historyId/cancel', async (c) => {
 
     if (queueJob) {
       // Cancel the queue job
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const result = await cancelQueueJob(queueJob.id!)
       if (!result.success) {
         logger.warn({ historyId, error: result.error }, 'Failed to cancel queue job')
@@ -140,12 +143,12 @@ jobs.post('/history/:historyId/cancel', async (c) => {
       success: true,
       message: 'Job cancelled',
     })
-  } catch (error: any) {
-    logger.error({ error: error.message, historyId }, 'Failed to cancel job')
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), historyId }, 'Failed to cancel job')
     return c.json({
       success: false,
       error: 'Failed to cancel job',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 500)
   }
 })
@@ -157,6 +160,7 @@ jobs.post('/history/:historyId/cancel', async (c) => {
 // Create backup job (attach userId)
 jobs.post('/', zValidator('json', CreateBackupJobSchema), async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const data = c.req.valid('json')
 
@@ -184,11 +188,11 @@ jobs.post('/', zValidator('json', CreateBackupJobSchema), async (c) => {
     }, 'Backup job created with schedule')
 
     return c.json({ success: true, data: job }, 201)
-  } catch (error: any) {
+  } catch (error: unknown) {
     return c.json({
       success: false,
       error: 'Failed to create backup job',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     }, 400)
   }
 })
@@ -196,6 +200,7 @@ jobs.post('/', zValidator('json', CreateBackupJobSchema), async (c) => {
 // Get single job (user's own only)
 jobs.get('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -221,6 +226,7 @@ jobs.get('/:id', async (c) => {
 // Update job (user's own only)
 jobs.patch('/:id', zValidator('json', UpdateBackupJobSchema), async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
   const data = c.req.valid('json')
@@ -268,7 +274,7 @@ jobs.patch('/:id', zValidator('json', UpdateBackupJobSchema), async (c) => {
     }, 'Backup job updated')
 
     return c.json({ success: true, data: job })
-  } catch (error) {
+  } catch {
     return c.json({
       success: false,
       error: 'Failed to update job',
@@ -279,6 +285,7 @@ jobs.patch('/:id', zValidator('json', UpdateBackupJobSchema), async (c) => {
 // Delete job (user's own only)
 jobs.delete('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -301,7 +308,7 @@ jobs.delete('/:id', async (c) => {
       success: true,
       message: 'Job deleted successfully',
     })
-  } catch (error) {
+  } catch {
     return c.json({
       success: false,
       error: 'Failed to delete job',
@@ -312,6 +319,7 @@ jobs.delete('/:id', async (c) => {
 // Trigger immediate job run (user's own only)
 jobs.post('/:id/run', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -375,12 +383,13 @@ jobs.post('/:id/run', async (c) => {
         message: 'Job queued for execution',
       },
     })
-  } catch (error: any) {
-    logger.error({ error: error.message, jobId: id }, 'Failed to queue job')
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    logger.error({ error: errMsg, jobId: id }, 'Failed to queue job')
     return c.json({
       success: false,
       error: 'Failed to queue job',
-      details: error.message,
+      details: errMsg,
     }, 500)
   }
 })
@@ -388,6 +397,7 @@ jobs.post('/:id/run', async (c) => {
 // Get job history (user's own job only)
 jobs.get('/:id/history', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 

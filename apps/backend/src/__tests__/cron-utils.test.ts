@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
   validateCronExpression,
   getNextRunTime,
@@ -54,7 +54,6 @@ describe('cron-utils', () => {
     it('uses current time when fromDate not provided', () => {
       const before = new Date()
       const next = getNextRunTime('0 * * * *') // Every hour
-      const after = new Date()
 
       expect(next >= before).toBe(true)
     })

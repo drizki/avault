@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -173,8 +174,9 @@ describe('S3Adapter', () => {
       const mockStream = { pipe: vi.fn() }
       const result = await adapter.uploadFile({
         destinationId: 'my-bucket',
+        folderPath: '',
         fileName: 'backup.tar.gz',
-        fileStream: mockStream,
+        fileStream: mockStream as unknown as NodeJS.ReadableStream,
         fileSize: 1024,
         mimeType: 'application/gzip',
       })
@@ -195,7 +197,7 @@ describe('S3Adapter', () => {
         destinationId: 'my-bucket',
         folderPath: 'backups/daily',
         fileName: 'backup.tar.gz',
-        fileStream: mockStream,
+        fileStream: mockStream as unknown as NodeJS.ReadableStream,
         fileSize: 2048,
         mimeType: 'application/gzip',
       })
@@ -207,8 +209,8 @@ describe('S3Adapter', () => {
       mocks.uploadDone.mockResolvedValue({})
 
       // Capture the progress handler
-      let progressHandler: Function
-      mocks.uploadOn.mockImplementation((event: string, handler: Function) => {
+      let progressHandler: ((progress: { loaded: number }) => void) | undefined
+      mocks.uploadOn.mockImplementation((event: string, handler: (progress: { loaded: number }) => void) => {
         if (event === 'httpUploadProgress') {
           progressHandler = handler
         }
@@ -220,8 +222,9 @@ describe('S3Adapter', () => {
       // Start upload (but mock uploadDone to trigger progress first)
       const uploadPromise = adapter.uploadFile({
         destinationId: 'my-bucket',
+        folderPath: '',
         fileName: 'backup.tar.gz',
-        fileStream: mockStream,
+        fileStream: mockStream as unknown as NodeJS.ReadableStream,
         fileSize: 1000,
         mimeType: 'application/gzip',
         onProgress,

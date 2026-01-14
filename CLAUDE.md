@@ -187,9 +187,16 @@ If any check fails, fix the issues before committing.
 
 ## Release Process
 
-1. Create release branch from develop: `git checkout -b release/vX.Y.Z`
-2. Run `./scripts/bump-version.sh [major|minor|patch]`
-3. Edit CHANGELOG.md - move items from [Unreleased] to new version
+1. Create release branch from main: `git checkout -b release/vX.Y.Z`
+2. Run `./scripts/bump-version.sh [major|minor|patch]` - This automatically bumps:
+   - Root `package.json`
+   - All app package.json files: `apps/backend/package.json`, `apps/frontend/package.json`, `apps/worker/package.json`
+   - All package package.json files: `packages/shared/package.json`, `packages/storage/package.json`
+3. Edit CHANGELOG.md - move items from [Unreleased] to new version (script handles template)
 4. Commit: `git commit -m "chore: prepare release vX.Y.Z"`
-5. Merge to main, tag, push
-6. GitHub Actions will build and push Docker images
+5. Merge to main (fast-forward)
+6. Create annotated tag: `git tag -a vX.Y.Z -m "chore: release vX.Y.Z"`
+7. Push main and tag: `git push origin main && git push origin vX.Y.Z`
+8. GitHub Actions will build and push Docker images
+
+**Important**: All individual app and package versions MUST be kept in sync with the root version. Never manually update only the root version.

@@ -83,7 +83,7 @@ describe('history routes', () => {
       const res = await app.request('/api/history')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.data).toHaveLength(1)
       expect(body.data.data[0].bytesUploaded).toBe('1024000')
@@ -98,7 +98,7 @@ describe('history routes', () => {
     it('filters by jobId', async () => {
       const jobId = 'clxxxxxxxxxxxxxxxxx123456' // Valid CUID format
       const res = await app.request(`/api/history?jobId=${jobId}`)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
@@ -132,7 +132,7 @@ describe('history routes', () => {
 
       const res = await app.request('/api/history?page=3&pageSize=10')
 
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.pagination).toEqual({
         page: 3,
         pageSize: 10,
@@ -180,7 +180,7 @@ describe('history routes', () => {
       const res = await app.request('/api/history/hist-1')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.id).toBe('hist-1')
       expect(body.data.bytesUploaded).toBe('2048000')
@@ -192,7 +192,7 @@ describe('history routes', () => {
       const res = await app.request('/api/history/nonexistent')
 
       expect(res.status).toBe(404)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('History entry not found')
     })

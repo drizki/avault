@@ -12,10 +12,12 @@ history.use('*', requireAuth)
 // Get all backup history (paginated, filtered by user's jobs)
 history.get('/', zValidator('query', BackupHistoryQuerySchema), async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const { jobId, status, page, pageSize } = c.req.valid('query')
 
   // Build where clause - must belong to user's jobs
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {
     job: {
       userId,
@@ -75,6 +77,7 @@ history.get('/', zValidator('query', BackupHistoryQuerySchema), async (c) => {
 // Get single history entry (user's own only)
 history.get('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 
 // Mock all external dependencies before importing
@@ -19,7 +20,9 @@ const mocks = vi.hoisted(() => {
     executeLogCleanup,
     scheduleLogCleanup,
     getCapturedProcessor: () => capturedProcessor,
-    setCapturedProcessor: (p: any) => { capturedProcessor = p },
+    setCapturedProcessor: (p: any) => {
+      capturedProcessor = p
+    },
   }
 })
 

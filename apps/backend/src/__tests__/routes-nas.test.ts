@@ -62,7 +62,7 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/info')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.mountPath).toBeDefined()
     })
@@ -77,15 +77,24 @@ describe('nas routes', () => {
       ])
       mocks.fsStat.mockImplementation((itemPath) => {
         if (itemPath.includes('documents')) {
-          return Promise.resolve({ isDirectory: () => true, isFile: () => false, mtime: new Date() })
+          return Promise.resolve({
+            isDirectory: () => true,
+            isFile: () => false,
+            mtime: new Date(),
+          })
         }
-        return Promise.resolve({ isDirectory: () => false, isFile: () => true, size: 1024, mtime: new Date() })
+        return Promise.resolve({
+          isDirectory: () => false,
+          isFile: () => true,
+          size: 1024,
+          mtime: new Date(),
+        })
       })
 
       const res = await app.request('/api/nas/browse?path=/')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.items).toHaveLength(2)
     })
@@ -96,7 +105,7 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/browse?path=/')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toContain('NAS mount path not found')
     })
@@ -107,19 +116,21 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/browse?path=/../../../etc/passwd')
 
       expect(res.status).toBe(403)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toContain('Access denied')
     })
 
     it('returns 403 on permission denied', async () => {
       mocks.fsAccess.mockResolvedValue(undefined)
-      mocks.fsReaddir.mockRejectedValue({ code: 'EACCES', message: 'Permission denied' })
+      const err = new Error('Permission denied') as NodeJS.ErrnoException
+      err.code = 'EACCES'
+      mocks.fsReaddir.mockRejectedValue(err)
 
       const res = await app.request('/api/nas/browse?path=/')
 
       expect(res.status).toBe(403)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toContain('Permission denied')
     })
@@ -131,7 +142,7 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/browse?path=/')
 
       expect(res.status).toBe(403)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toContain('Cannot read directory')
     })
@@ -151,7 +162,7 @@ describe('nas routes', () => {
 
       const res = await app.request('/api/nas/browse?path=/')
 
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.items).toHaveLength(1)
       expect(body.data.items[0].name).toBe('readable')
@@ -163,7 +174,7 @@ describe('nas routes', () => {
 
       const res = await app.request('/api/nas/browse')
 
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.path).toBe('/')
     })
@@ -177,7 +188,7 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/stats?path=/documents')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toEqual({
         path: '/documents',
@@ -207,7 +218,7 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/stats?path=/')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.fileCount).toBe(2)
       expect(body.data.directoryCount).toBe(1)
@@ -221,7 +232,7 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/stats?path=/../../../etc')
 
       expect(res.status).toBe(403)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toContain('Access denied')
     })
@@ -232,7 +243,7 @@ describe('nas routes', () => {
       const res = await app.request('/api/nas/stats?path=/documents')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toContain('NAS mount path not found')
     })

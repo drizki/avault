@@ -109,9 +109,7 @@ export function BackupJobsPanel() {
     e.stopPropagation()
     try {
       await api.patch(`/jobs/${job.id}`, { enabled: !job.enabled })
-      setJobs(prev => prev.map(j =>
-        j.id === job.id ? { ...j, enabled: !j.enabled } : j
-      ))
+      setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, enabled: !j.enabled } : j)))
     } catch (error) {
       console.error('Failed to toggle job:', error)
     }
@@ -189,12 +187,17 @@ export function BackupJobsPanel() {
           ) : (
             <div className="divide-y divide-border h-full overflow-y-auto">
               {jobs.map((job) => (
-                <div key={job.id} className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors">
+                <div
+                  key={job.id}
+                  className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors"
+                >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="font-medium text-sm truncate">{job.name}</span>
                       {!job.enabled && (
-                        <Badge variant="secondary" className="text-[9px] h-4">Disabled</Badge>
+                        <Badge variant="secondary" className="text-[9px] h-4">
+                          Disabled
+                        </Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -257,7 +260,14 @@ export function BackupJobsPanel() {
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         onSuccess={fetchJobs}
-        editJob={editJob}
+        editJob={
+          editJob
+            ? {
+                ...editJob,
+                retentionType: editJob.retentionType as 'VERSION_COUNT' | 'DAYS' | 'HYBRID',
+              }
+            : null
+        }
       />
 
       <DeleteConfirmDialog

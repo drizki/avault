@@ -64,8 +64,10 @@ export class GoogleOAuthClient {
     const { tokens } = await this.oauth2Client.getToken(code)
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       access_token: tokens.access_token!,
       refresh_token: tokens.refresh_token || undefined,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expiry_date: tokens.expiry_date!,
       token_type: tokens.token_type || 'Bearer',
       id_token: tokens.id_token || undefined,
@@ -87,12 +89,17 @@ export class GoogleOAuthClient {
     const { data } = await oauth2.userinfo.get()
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       id: data.id!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       email: data.email!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       verified_email: data.verified_email!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       name: data.name!,
       given_name: data.given_name || '',
       family_name: data.family_name || '',
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       picture: data.picture!,
       locale: data.locale || 'en',
     }

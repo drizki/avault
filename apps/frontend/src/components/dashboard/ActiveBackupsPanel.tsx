@@ -77,18 +77,26 @@ export function ActiveBackupsPanel({ jobs, isConnected }: ActiveBackupsPanelProp
       <PanelHeader
         actions={
           isConnected ? (
-            <Badge variant="outline" className="bg-status-success/20 text-status-success h-5 text-[10px]">
+            <Badge
+              variant="outline"
+              className="bg-status-success/20 text-status-success h-5 text-[10px]"
+            >
               Live
             </Badge>
           ) : (
-            <Badge variant="outline" className="bg-status-error/20 text-status-error h-5 text-[10px]">
+            <Badge
+              variant="outline"
+              className="bg-status-error/20 text-status-error h-5 text-[10px]"
+            >
               Connecting...
             </Badge>
           )
         }
       >
         <PanelTitle className="flex items-center gap-2">
-          <Loader2 className={`h-4 w-4 ${activeJobs.length > 0 ? 'animate-spin text-primary' : 'text-muted-foreground'}`} />
+          <Loader2
+            className={`h-4 w-4 ${activeJobs.length > 0 ? 'animate-spin text-primary' : 'text-muted-foreground'}`}
+          />
           Active Backups
           {activeJobs.length > 0 && (
             <Badge className="bg-primary/20 text-primary h-5 text-[10px] ml-1">
@@ -115,16 +123,19 @@ export function ActiveBackupsPanel({ jobs, isConnected }: ActiveBackupsPanelProp
           ) : (
             <div className="divide-y divide-border">
               {activeJobs.map((job) => {
-                const progress = job.progress.filesScanned > 0
-                  ? Math.round((job.progress.filesUploaded / job.progress.filesScanned) * 100)
-                  : 0
+                const progress =
+                  job.progress.filesScanned > 0
+                    ? Math.round((job.progress.filesUploaded / job.progress.filesScanned) * 100)
+                    : 0
 
                 return (
                   <div key={job.historyId} className="p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="font-medium text-sm truncate">{job.jobName}</span>
-                        <Badge className={`${getStatusColor(job.status)} text-white h-5 text-[10px]`}>
+                        <Badge
+                          className={`${getStatusColor(job.status)} text-white h-5 text-[10px]`}
+                        >
                           {getStatusLabel(job.status)}
                         </Badge>
                       </div>

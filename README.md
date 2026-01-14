@@ -184,15 +184,15 @@ avault/
 
 See `.env.example` for all available configuration options. Key variables:
 
-| Variable | Description |
-|----------|-------------|
-| `AVAULT_VERSION` | Docker image version tag (default: latest) |
-| `POSTGRES_PASSWORD` | PostgreSQL password (required) |
-| `ENCRYPTION_KEY` | AES-256 encryption key for credentials |
-| `JWT_SECRET` | JWT signing secret |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `NAS_MOUNT_PATH` | Host path where NAS is mounted |
+| Variable               | Description                                |
+| ---------------------- | ------------------------------------------ |
+| `AVAULT_VERSION`       | Docker image version tag (default: latest) |
+| `POSTGRES_PASSWORD`    | PostgreSQL password (required)             |
+| `ENCRYPTION_KEY`       | AES-256 encryption key for credentials     |
+| `JWT_SECRET`           | JWT signing secret                         |
+| `GOOGLE_CLIENT_ID`     | Google OAuth client ID                     |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret                 |
+| `NAS_MOUNT_PATH`       | Host path where NAS is mounted             |
 
 ### NAS Mount
 
@@ -290,6 +290,7 @@ The project uses GitHub Actions for continuous integration and deployment:
 ### Creating a Release
 
 1. Create release branch:
+
    ```bash
    git checkout -b release/v1.0.0
    ./scripts/bump-version.sh minor
@@ -298,6 +299,7 @@ The project uses GitHub Actions for continuous integration and deployment:
 2. Update CHANGELOG.md with release notes
 
 3. Merge to main and tag:
+
    ```bash
    git checkout main
    git merge release/v1.0.0
@@ -365,7 +367,6 @@ MIT License - see LICENSE file for details.
 
 - **Issues**: [GitHub Issues](https://github.com/drizki/avault/issues)
 - **Documentation**: [docs/](docs/)
-
 
 ## Why another backup tool?
 

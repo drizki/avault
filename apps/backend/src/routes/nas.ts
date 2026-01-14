@@ -34,10 +34,13 @@ nas.get('/browse', zValidator('query', BrowsePathSchema), async (c) => {
     try {
       await fs.access(RESOLVED_MOUNT_PATH)
     } catch {
-      return c.json({
-        success: false,
-        error: `NAS mount path not found: ${NAS_MOUNT_PATH}. Set NAS_MOUNT_PATH in your .env file.`,
-      }, 500)
+      return c.json(
+        {
+          success: false,
+          error: `NAS mount path not found: ${NAS_MOUNT_PATH}. Set NAS_MOUNT_PATH in your .env file.`,
+        },
+        500
+      )
     }
 
     const fullPath = path.join(RESOLVED_MOUNT_PATH, requestedPath)
@@ -45,10 +48,13 @@ nas.get('/browse', zValidator('query', BrowsePathSchema), async (c) => {
     // Security: Ensure path is within NAS mount
     const resolvedPath = path.resolve(fullPath)
     if (!resolvedPath.startsWith(RESOLVED_MOUNT_PATH)) {
-      return c.json({
-        success: false,
-        error: 'Access denied: Path outside NAS mount',
-      }, 403)
+      return c.json(
+        {
+          success: false,
+          error: 'Access denied: Path outside NAS mount',
+        },
+        403
+      )
     }
 
     // Read directory
@@ -57,15 +63,26 @@ nas.get('/browse', zValidator('query', BrowsePathSchema), async (c) => {
       logger.debug({ path: resolvedPath }, 'NAS reading directory')
       entries = await fs.readdir(resolvedPath, { withFileTypes: true })
       logger.debug({ path: resolvedPath, count: entries.length }, 'NAS found entries')
-    } catch (readError: any) {
+    } catch (readError: unknown) {
       // Permission denied or other read error
-      logger.error({ path: resolvedPath, code: readError.code, message: readError.message }, 'NAS failed to read directory')
-      return c.json({
-        success: false,
-        error: readError.code === 'EACCES' || readError.code === 'EPERM'
-          ? `Permission denied: ${resolvedPath}. On macOS, grant Full Disk Access to Terminal in System Preferences > Privacy & Security.`
-          : `Cannot read directory: ${readError.message}`,
-      }, 403)
+      const err =
+        readError instanceof Error && 'code' in readError
+          ? (readError as NodeJS.ErrnoException)
+          : null
+      logger.error(
+        { path: resolvedPath, code: err?.code, message: err?.message },
+        'NAS failed to read directory'
+      )
+      return c.json(
+        {
+          success: false,
+          error:
+            err?.code === 'EACCES' || err?.code === 'EPERM'
+              ? `Permission denied: ${resolvedPath}. On macOS, grant Full Disk Access to Terminal in System Preferences > Privacy & Security.`
+              : `Cannot read directory: ${err?.message || 'Unknown error'}`,
+        },
+        403
+      )
     }
 
     const items = await Promise.all(
@@ -87,17 +104,20 @@ nas.get('/browse', zValidator('query', BrowsePathSchema), async (c) => {
             size: stats.isFile() ? stats.size : undefined,
             modified: stats.mtime,
           }
-        } catch (error) {
+        } catch {
           // Skip files we can't read (permission issues, broken symlinks, etc.)
           return null
         }
       })
     )
 
-    const validItems = items.filter(Boolean)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const validItems = items.filter(Boolean) as any[]
 
     // Log stats
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dirs = validItems.filter((i: any) => i.type === 'directory')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const files = validItems.filter((i: any) => i.type === 'file')
     logger.debug({ directories: dirs.length, files: files.length }, 'NAS browse result')
 
@@ -108,13 +128,17 @@ nas.get('/browse', zValidator('query', BrowsePathSchema), async (c) => {
         items: validItems,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ err: error }, 'NAS browse error')
-    return c.json({
-      success: false,
-      error: 'Failed to read directory',
-      details: error.message,
-    }, 500)
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to read directory',
+        details: message,
+      },
+      500
+    )
   }
 })
 
@@ -127,10 +151,13 @@ nas.get('/stats', zValidator('query', BrowsePathSchema), async (c) => {
     try {
       await fs.access(RESOLVED_MOUNT_PATH)
     } catch {
-      return c.json({
-        success: false,
-        error: `NAS mount path not found: ${NAS_MOUNT_PATH}. Set NAS_MOUNT_PATH in your .env file.`,
-      }, 500)
+      return c.json(
+        {
+          success: false,
+          error: `NAS mount path not found: ${NAS_MOUNT_PATH}. Set NAS_MOUNT_PATH in your .env file.`,
+        },
+        500
+      )
     }
 
     const fullPath = path.join(RESOLVED_MOUNT_PATH, requestedPath)
@@ -138,10 +165,13 @@ nas.get('/stats', zValidator('query', BrowsePathSchema), async (c) => {
     // Security: Ensure path is within NAS mount
     const resolvedPath = path.resolve(fullPath)
     if (!resolvedPath.startsWith(RESOLVED_MOUNT_PATH)) {
-      return c.json({
-        success: false,
-        error: 'Access denied: Path outside NAS mount',
-      }, 403)
+      return c.json(
+        {
+          success: false,
+          error: 'Access denied: Path outside NAS mount',
+        },
+        403
+      )
     }
 
     // Calculate stats recursively with limits to prevent runaway operations
@@ -211,11 +241,14 @@ nas.get('/stats', zValidator('query', BrowsePathSchema), async (c) => {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     logger.error({ err: error }, 'NAS stats error')
-    return c.json({
-      success: false,
-      error: 'Failed to calculate directory stats',
-      details: message,
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to calculate directory stats',
+        details: message,
+      },
+      500
+    )
   }
 })
 

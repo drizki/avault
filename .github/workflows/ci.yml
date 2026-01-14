@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "20"
-  PNPM_VERSION: "9.15.0"
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.0'
 
 jobs:
   lint:
@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -74,6 +74,14 @@ jobs:
       REDIS_PORT: 6379
       ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       JWT_SECRET: test-jwt-secret-for-ci-testing-only
+      GOOGLE_CLIENT_ID: ci-test-client-id.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: ci-test-client-secret
+      GOOGLE_REDIRECT_URI: http://localhost:4000/api/auth/callback/google
+      FRONTEND_URL: http://localhost:3000
+      COOKIE_DOMAIN: localhost
+      COOKIE_SECURE: 'false'
+      NAS_MOUNT_PATH: /tmp/nas
+      LOG_LEVEL: error
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -87,7 +95,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -96,7 +104,10 @@ jobs:
         run: pnpm db:generate
 
       - name: Push database schema
-        run: pnpm db:push
+        run: cd packages/shared && pnpm exec prisma db push
+
+      - name: Build packages
+        run: pnpm --filter @avault/shared --filter @avault/storage build
 
       - name: Run tests
         run: pnpm test
@@ -125,7 +136,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

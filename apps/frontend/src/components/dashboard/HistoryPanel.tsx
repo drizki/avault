@@ -19,12 +19,7 @@ import {
   Play,
   Cloud,
 } from 'lucide-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { formatDistanceToNow } from 'date-fns'
 import { api } from '@/lib/api'
 import { LogViewerSheet } from '@/components/LogViewerSheet'
@@ -170,11 +165,7 @@ export function HistoryPanel() {
   }
 
   function getTriggerIcon(source: 'MANUAL' | 'SCHEDULED') {
-    return source === 'SCHEDULED' ? (
-      <Calendar className="h-3 w-3" />
-    ) : (
-      <Play className="h-3 w-3" />
-    )
+    return source === 'SCHEDULED' ? <Calendar className="h-3 w-3" /> : <Play className="h-3 w-3" />
   }
 
   return (
@@ -228,10 +219,7 @@ export function HistoryPanel() {
             <TooltipProvider delayDuration={300}>
               <div className="divide-y divide-border h-full overflow-y-auto">
                 {history.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-2 hover:bg-secondary/30 transition-colors"
-                  >
+                  <div key={item.id} className="p-2 hover:bg-secondary/30 transition-colors">
                     {/* Top row: Status, Job name, Actions */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -244,7 +232,9 @@ export function HistoryPanel() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="top">
-                            <p>{item.triggerSource === 'SCHEDULED' ? 'Scheduled run' : 'Manual run'}</p>
+                            <p>
+                              {item.triggerSource === 'SCHEDULED' ? 'Scheduled run' : 'Manual run'}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -279,9 +269,13 @@ export function HistoryPanel() {
 
                     {/* Second row: Time, Duration, Stats */}
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-1 ml-5">
-                      <span>{formatDistanceToNow(new Date(item.startedAt), { addSuffix: true })}</span>
+                      <span>
+                        {formatDistanceToNow(new Date(item.startedAt), { addSuffix: true })}
+                      </span>
                       <span className="text-border">·</span>
-                      <span className="font-mono">{formatDuration(item.startedAt, item.completedAt)}</span>
+                      <span className="font-mono">
+                        {formatDuration(item.startedAt, item.completedAt)}
+                      </span>
                       {item.filesUploaded > 0 && (
                         <>
                           <span className="text-border">·</span>
@@ -334,11 +328,15 @@ export function HistoryPanel() {
                     </div>
 
                     {/* Error message for failed jobs */}
-                    {item.errorMessage && (item.status === 'FAILED' || item.status === 'PARTIAL_SUCCESS') && (
-                      <div className="mt-1 ml-5 text-[10px] text-status-error truncate" title={item.errorMessage}>
-                        {item.errorMessage}
-                      </div>
-                    )}
+                    {item.errorMessage &&
+                      (item.status === 'FAILED' || item.status === 'PARTIAL_SUCCESS') && (
+                        <div
+                          className="mt-1 ml-5 text-[10px] text-status-error truncate"
+                          title={item.errorMessage}
+                        >
+                          {item.errorMessage}
+                        </div>
+                      )}
                   </div>
                 ))}
               </div>

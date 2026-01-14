@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
-import { logger, createRedisConnection, Redis } from '@avault/shared'
+import { logger, Redis } from '@avault/shared'
 import { verifyToken } from '../lib/auth/jwt'
 import { requireAuth } from '../middleware/auth'
 import { getQueueStats, backupQueue } from '../lib/queue'
@@ -24,6 +24,7 @@ dashboard.use('*', async (c, next) => {
 // Get aggregated dashboard statistics
 dashboard.get('/stats', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -32,48 +33,42 @@ dashboard.get('/stats', async (c) => {
     const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
     // Fetch all data in parallel
-    const [
-      jobsTotal,
-      jobsEnabled,
-      historyLast24h,
-      historyLast7d,
-      queueStats,
-      bytesToday,
-    ] = await Promise.all([
-      // Total jobs
-      db.backupJob.count({ where: { userId } }),
-      // Enabled jobs
-      db.backupJob.count({ where: { userId, enabled: true } }),
-      // History last 24h grouped by status
-      db.backupHistory.groupBy({
-        by: ['status'],
-        where: {
-          job: { userId },
-          startedAt: { gte: last24h },
-        },
-        _count: { id: true },
-      }),
-      // History last 7d grouped by status
-      db.backupHistory.groupBy({
-        by: ['status'],
-        where: {
-          job: { userId },
-          startedAt: { gte: last7d },
-        },
-        _count: { id: true },
-      }),
-      // Queue stats
-      getQueueStats(),
-      // Bytes uploaded today
-      db.backupHistory.aggregate({
-        where: {
-          job: { userId },
-          startedAt: { gte: last24h },
-          status: 'SUCCESS',
-        },
-        _sum: { bytesUploaded: true },
-      }),
-    ])
+    const [jobsTotal, jobsEnabled, historyLast24h, historyLast7d, queueStats, bytesToday] =
+      await Promise.all([
+        // Total jobs
+        db.backupJob.count({ where: { userId } }),
+        // Enabled jobs
+        db.backupJob.count({ where: { userId, enabled: true } }),
+        // History last 24h grouped by status
+        db.backupHistory.groupBy({
+          by: ['status'],
+          where: {
+            job: { userId },
+            startedAt: { gte: last24h },
+          },
+          _count: { id: true },
+        }),
+        // History last 7d grouped by status
+        db.backupHistory.groupBy({
+          by: ['status'],
+          where: {
+            job: { userId },
+            startedAt: { gte: last7d },
+          },
+          _count: { id: true },
+        }),
+        // Queue stats
+        getQueueStats(),
+        // Bytes uploaded today
+        db.backupHistory.aggregate({
+          where: {
+            job: { userId },
+            startedAt: { gte: last24h },
+            status: 'SUCCESS',
+          },
+          _sum: { bytesUploaded: true },
+        }),
+      ])
 
     // Parse 24h stats
     const stats24h = {
@@ -113,18 +108,22 @@ dashboard.get('/stats', async (c) => {
         queue: queueStats,
       },
     })
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: 'Failed to fetch dashboard stats',
-      details: error.message,
-    }, 500)
+  } catch (error: unknown) {
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch dashboard stats',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
 // Get currently active/running backups
 dashboard.get('/active', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -144,11 +143,11 @@ dashboard.get('/active', async (c) => {
 
     // Get progress data from BullMQ jobs
     const activeJobs = await backupQueue.getJobs(['active', 'waiting'])
-    const progressMap = new Map<string, any>()
+    const progressMap = new Map<string, unknown>()
 
     for (const job of activeJobs) {
       if (job.data.historyId) {
-        const progress = job.progress as any
+        const progress = job.progress as unknown
         if (progress && typeof progress === 'object') {
           progressMap.set(job.data.historyId, progress)
         }
@@ -157,7 +156,11 @@ dashboard.get('/active', async (c) => {
 
     // Combine history with progress
     const jobs = activeHistory.map((h) => {
-      const progress = progressMap.get(h.id) || {}
+      const progressData = progressMap.get(h.id)
+      const progress =
+        typeof progressData === 'object' && progressData !== null
+          ? (progressData as Record<string, unknown>)
+          : {}
       return {
         historyId: h.id,
         jobId: h.job.id,
@@ -165,12 +168,23 @@ dashboard.get('/active', async (c) => {
         status: h.status,
         startedAt: h.startedAt.toISOString(),
         progress: {
-          filesScanned: progress.filesScanned || h.filesScanned || 0,
-          filesUploaded: progress.filesUploaded || h.filesUploaded || 0,
-          filesFailed: progress.filesFailed || h.filesFailed || 0,
-          bytesUploaded: progress.bytesUploaded || Number(h.bytesUploaded) || 0,
-          currentFile: progress.currentFile || null,
-          uploadSpeed: progress.uploadSpeed || null,
+          filesScanned:
+            (typeof progress.filesScanned === 'number' ? progress.filesScanned : h.filesScanned) ||
+            0,
+          filesUploaded:
+            (typeof progress.filesUploaded === 'number'
+              ? progress.filesUploaded
+              : h.filesUploaded) || 0,
+          filesFailed:
+            (typeof progress.filesFailed === 'number' ? progress.filesFailed : h.filesFailed) || 0,
+          bytesUploaded:
+            (typeof progress.bytesUploaded === 'number'
+              ? progress.bytesUploaded
+              : Number(h.bytesUploaded)) || 0,
+          currentFile:
+            (typeof progress.currentFile === 'string' ? progress.currentFile : null) || null,
+          uploadSpeed:
+            (typeof progress.uploadSpeed === 'number' ? progress.uploadSpeed : null) || null,
         },
       }
     })
@@ -179,18 +193,22 @@ dashboard.get('/active', async (c) => {
       success: true,
       data: { jobs },
     })
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: 'Failed to fetch active jobs',
-      details: error.message,
-    }, 500)
+  } catch (error: unknown) {
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch active jobs',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
 // Get system health status
 dashboard.get('/health', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -221,7 +239,7 @@ dashboard.get('/health', async (c) => {
       const info = await redis.info('memory')
       const memMatch = info.match(/used_memory_human:(\S+)/)
       if (memMatch) redisMemory = memMatch[1]
-    } catch (e) {
+    } catch {
       redisStatus = 'down'
     } finally {
       redis.disconnect()
@@ -250,7 +268,7 @@ dashboard.get('/health', async (c) => {
       // Get active job count
       const queueStats = await getQueueStats()
       workerActiveJobs = queueStats.active
-    } catch (e) {
+    } catch {
       workerStatus = 'unknown'
     } finally {
       heartbeatRedis.disconnect()
@@ -303,24 +321,32 @@ dashboard.get('/health', async (c) => {
         services: {
           database: { status: 'up', latencyMs: dbLatency },
           redis: { status: redisStatus, latencyMs: redisLatency, memoryUsed: redisMemory },
-          worker: { status: workerStatus, lastHeartbeat: workerHeartbeat, activeJobs: workerActiveJobs },
+          worker: {
+            status: workerStatus,
+            lastHeartbeat: workerHeartbeat,
+            activeJobs: workerActiveJobs,
+          },
           storage: storageHealth,
         },
         timestamp: new Date().toISOString(),
       },
     })
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: 'Failed to check system health',
-      details: error.message,
-    }, 500)
+  } catch (error: unknown) {
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to check system health',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
 // Get upcoming scheduled jobs
 dashboard.get('/upcoming', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -345,7 +371,9 @@ dashboard.get('/upcoming', async (c) => {
       id: job.id,
       name: job.name,
       schedule: job.schedule,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       nextRunAt: job.nextRunAt!.toISOString(),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       nextRunIn: Math.max(0, Math.floor((job.nextRunAt!.getTime() - now.getTime()) / 1000)),
       destination: {
         name: job.destination.name,
@@ -357,18 +385,22 @@ dashboard.get('/upcoming', async (c) => {
       success: true,
       data: { jobs },
     })
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: 'Failed to fetch upcoming jobs',
-      details: error.message,
-    }, 500)
+  } catch (error: unknown) {
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch upcoming jobs',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
 // Get chart data for history visualization
 dashboard.get('/chart-data', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const period = c.req.query('period') || '7d'
 
@@ -402,11 +434,19 @@ dashboard.get('/chart-data', async (c) => {
     })
 
     // Group by day
-    const dailyMap = new Map<string, { success: number; failed: number; partial: number; bytesUploaded: bigint }>()
+    const dailyMap = new Map<
+      string,
+      { success: number; failed: number; partial: number; bytesUploaded: bigint }
+    >()
 
     for (const entry of history) {
       const dateKey = entry.startedAt.toISOString().split('T')[0]
-      const existing = dailyMap.get(dateKey) || { success: 0, failed: 0, partial: 0, bytesUploaded: BigInt(0) }
+      const existing = dailyMap.get(dateKey) || {
+        success: 0,
+        failed: 0,
+        partial: 0,
+        bytesUploaded: BigInt(0),
+      }
 
       if (entry.status === 'SUCCESS') existing.success++
       else if (entry.status === 'FAILED') existing.failed++
@@ -421,7 +461,12 @@ dashboard.get('/chart-data', async (c) => {
     const current = new Date(startDate)
     while (current <= now) {
       const dateKey = current.toISOString().split('T')[0]
-      const data = dailyMap.get(dateKey) || { success: 0, failed: 0, partial: 0, bytesUploaded: BigInt(0) }
+      const data = dailyMap.get(dateKey) || {
+        success: 0,
+        failed: 0,
+        partial: 0,
+        bytesUploaded: BigInt(0),
+      }
       daily.push({
         date: dateKey,
         success: data.success,
@@ -439,18 +484,22 @@ dashboard.get('/chart-data', async (c) => {
         daily,
       },
     })
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: 'Failed to fetch chart data',
-      details: error.message,
-    }, 500)
+  } catch (error: unknown) {
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch chart data',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
 // Get active alerts
 dashboard.get('/alerts', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -464,6 +513,7 @@ dashboard.get('/alerts', async (c) => {
       title: string
       message: string
       timestamp: string
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metadata?: Record<string, any>
     }> = []
 
@@ -509,7 +559,10 @@ dashboard.get('/alerts', async (c) => {
     })
 
     for (const cred of expiringCredentials) {
-      const daysLeft = Math.ceil((cred.expiresAt!.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const daysLeft = Math.ceil(
+        (cred.expiresAt!.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+      )
       alerts.push({
         id: `expiring-${cred.id}`,
         type: 'credential_expiring',
@@ -540,6 +593,7 @@ dashboard.get('/alerts', async (c) => {
         severity: 'critical',
         title: 'Credential Expired',
         message: `"${cred.name}" has expired and needs to be re-authenticated`,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timestamp: cred.expiresAt!.toISOString(),
         metadata: { credentialId: cred.id },
       })
@@ -560,12 +614,15 @@ dashboard.get('/alerts', async (c) => {
         unreadCount: alerts.length,
       },
     })
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: 'Failed to fetch alerts',
-      details: error.message,
-    }, 500)
+  } catch (error: unknown) {
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch alerts',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
@@ -585,7 +642,6 @@ dashboard.get('/stream', async (c) => {
   }
 
   const userId = payload.userId
-  const db = c.get('db')
   logger.debug({ userId }, 'Dashboard SSE user connected')
 
   // Set SSE headers
@@ -634,10 +690,12 @@ dashboard.get('/stream', async (c) => {
       statsInterval = setInterval(async () => {
         try {
           const queueStats = await getQueueStats()
-          await stream.writeln(`data: ${JSON.stringify({
-            type: 'queue:update',
-            payload: queueStats,
-          })}\n`)
+          await stream.writeln(
+            `data: ${JSON.stringify({
+              type: 'queue:update',
+              payload: queueStats,
+            })}\n`
+          )
         } catch (error) {
           logger.error({ err: error }, 'Dashboard SSE stats update error')
         }
@@ -661,19 +719,21 @@ dashboard.get('/stream', async (c) => {
               const age = Date.now() - parseInt(heartbeat, 10)
               workerStatus = age < 60000 ? 'up' : 'down'
             }
-          } catch (e) {
+          } catch {
             workerStatus = 'unknown'
           } finally {
             healthRedis.disconnect()
           }
 
-          await stream.writeln(`data: ${JSON.stringify({
-            type: 'health:update',
-            payload: {
-              worker: workerStatus,
-              timestamp: new Date().toISOString(),
-            },
-          })}\n`)
+          await stream.writeln(
+            `data: ${JSON.stringify({
+              type: 'health:update',
+              payload: {
+                worker: workerStatus,
+                timestamp: new Date().toISOString(),
+              },
+            })}\n`
+          )
         } catch (error) {
           logger.error({ err: error }, 'Dashboard SSE health update error')
         }

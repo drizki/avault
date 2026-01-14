@@ -120,10 +120,7 @@ function TreeNode({
           )}
         </button>
 
-        <div
-          className="flex items-center gap-2 flex-1 py-0.5"
-          onClick={() => onSelect(node)}
-        >
+        <div className="flex items-center gap-2 flex-1 py-0.5" onClick={() => onSelect(node)}>
           {node.isExpanded ? (
             <FolderOpen className="h-4 w-4 text-primary shrink-0" />
           ) : (
@@ -173,10 +170,7 @@ function TreeNode({
             ))}
 
           {node.isLoaded && !hasChildren && (
-            <div
-              className="text-xs py-1"
-              style={{ paddingLeft: `${(depth + 1) * 16 + 32}px` }}
-            >
+            <div className="text-xs py-1" style={{ paddingLeft: `${(depth + 1) * 16 + 32}px` }}>
               {node.error ? (
                 <span className="text-destructive">{node.error}</span>
               ) : (
@@ -269,11 +263,12 @@ export function FolderTree({
   }, [open])
 
   // Build display path (full path for NAS)
-  const displayPath = type === 'nas' && mountPath && value
-    ? value === '/'
-      ? mountPath
-      : `${mountPath}${value}`
-    : value
+  const displayPath =
+    type === 'nas' && mountPath && value
+      ? value === '/'
+        ? mountPath
+        : `${mountPath}${value}`
+      : value
 
   async function fetchInitialData() {
     setLoading(true)
@@ -307,6 +302,7 @@ export function FolderTree({
           throw new Error(response.error)
         }
       } else if (type === 'cloud' && credentialId && destinationId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any[]>(
           `/destinations/browse/${credentialId}/${destinationId}/folders`
         )
@@ -323,121 +319,131 @@ export function FolderTree({
           setRootNodes(dirs)
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch folders:', err)
-      setError(err.message || 'Failed to load folders')
+      setError(err instanceof Error ? err.message : String(err) || 'Failed to load folders')
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchChildren = useCallback(async (node: FolderNode): Promise<{ children: FolderNode[], error?: string }> => {
-    try {
-      if (type === 'nas') {
-        const response = await api.get<NasBrowseResponse>(
-          `/nas/browse?path=${encodeURIComponent(node.path)}`
-        )
+  const fetchChildren = useCallback(
+    async (node: FolderNode): Promise<{ children: FolderNode[]; error?: string }> => {
+      try {
+        if (type === 'nas') {
+          const response = await api.get<NasBrowseResponse>(
+            `/nas/browse?path=${encodeURIComponent(node.path)}`
+          )
 
-        if (response.success && response.data) {
-          const items = response.data.items || []
-          return {
-            children: items
-              .filter((item) => item.type === 'directory')
-              .map((item) => ({
+          if (response.success && response.data) {
+            const items = response.data.items || []
+            return {
+              children: items
+                .filter((item) => item.type === 'directory')
+                .map((item) => ({
+                  name: item.name,
+                  path: item.path,
+                  children: [],
+                  isLoaded: false,
+                  isLoading: false,
+                  isExpanded: false,
+                })),
+            }
+          } else if (response.error) {
+            return { children: [], error: response.error }
+          }
+        } else if (type === 'cloud' && credentialId && destinationId) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const response = await api.get<any[]>(
+            `/destinations/browse/${credentialId}/${destinationId}/folders?parentFolderId=${node.id}`
+          )
+          if (response.success && response.data) {
+            return {
+              children: response.data.map((item) => ({
+                id: item.id,
                 name: item.name,
-                path: item.path,
+                path: `${node.path}/${item.name}`,
                 children: [],
                 isLoaded: false,
                 isLoading: false,
                 isExpanded: false,
-              }))
+              })),
+            }
+          } else if (response.error) {
+            return { children: [], error: response.error }
           }
-        } else if (response.error) {
-          return { children: [], error: response.error }
         }
-      } else if (type === 'cloud' && credentialId && destinationId) {
-        const response = await api.get<any[]>(
-          `/destinations/browse/${credentialId}/${destinationId}/folders?parentFolderId=${node.id}`
-        )
-        if (response.success && response.data) {
-          return {
-            children: response.data.map((item) => ({
-              id: item.id,
-              name: item.name,
-              path: `${node.path}/${item.name}`,
-              children: [],
-              isLoaded: false,
-              isLoading: false,
-              isExpanded: false,
-            }))
-          }
-        } else if (response.error) {
-          return { children: [], error: response.error }
-        }
+      } catch (err: unknown) {
+        console.error('Failed to fetch children:', err)
+        return { children: [], error: err instanceof Error ? err.message : String(err) }
       }
-    } catch (err: any) {
-      console.error('Failed to fetch children:', err)
-      return { children: [], error: err.message }
-    }
-    return { children: [] }
-  }, [type, credentialId, destinationId])
+      return { children: [] }
+    },
+    [type, credentialId, destinationId]
+  )
 
   // Deep update a node in the tree by path
-  const updateNodeByPath = useCallback((
-    nodes: FolderNode[],
-    targetPath: string,
-    updater: (node: FolderNode) => FolderNode
-  ): FolderNode[] => {
-    return nodes.map((node) => {
-      if (node.path === targetPath) {
-        return updater(node)
-      }
-      // Always recurse into children if they exist
-      if (node.children.length > 0) {
-        const updatedChildren = updateNodeByPath(node.children, targetPath, updater)
-        // Only create new object if children actually changed
-        if (updatedChildren !== node.children) {
-          return { ...node, children: updatedChildren }
+  const updateNodeByPath = useCallback(
+    (
+      nodes: FolderNode[],
+      targetPath: string,
+      updater: (node: FolderNode) => FolderNode
+    ): FolderNode[] => {
+      return nodes.map((node) => {
+        if (node.path === targetPath) {
+          return updater(node)
         }
-      }
-      return node
-    })
-  }, [])
+        // Always recurse into children if they exist
+        if (node.children.length > 0) {
+          const updatedChildren = updateNodeByPath(node.children, targetPath, updater)
+          // Only create new object if children actually changed
+          if (updatedChildren !== node.children) {
+            return { ...node, children: updatedChildren }
+          }
+        }
+        return node
+      })
+    },
+    []
+  )
 
-  const handleToggle = useCallback(async (node: FolderNode) => {
-    if (node.isExpanded) {
-      // Collapse
-      setRootNodes((prev) =>
-        updateNodeByPath(prev, node.path, (n) => ({ ...n, isExpanded: false }))
-      )
-    } else {
-      // Expand - load children if needed
-      if (!node.isLoaded) {
-        // Set loading state
+  const handleToggle = useCallback(
+    async (node: FolderNode) => {
+      if (node.isExpanded) {
+        // Collapse
         setRootNodes((prev) =>
-          updateNodeByPath(prev, node.path, (n) => ({ ...n, isLoading: true, error: undefined }))
-        )
-
-        const result = await fetchChildren(node)
-
-        // Update with children or error
-        setRootNodes((prev) =>
-          updateNodeByPath(prev, node.path, (n) => ({
-            ...n,
-            children: result.children,
-            error: result.error,
-            isLoaded: true,
-            isLoading: false,
-            isExpanded: true,
-          }))
+          updateNodeByPath(prev, node.path, (n) => ({ ...n, isExpanded: false }))
         )
       } else {
-        setRootNodes((prev) =>
-          updateNodeByPath(prev, node.path, (n) => ({ ...n, isExpanded: true }))
-        )
+        // Expand - load children if needed
+        if (!node.isLoaded) {
+          // Set loading state
+          setRootNodes((prev) =>
+            updateNodeByPath(prev, node.path, (n) => ({ ...n, isLoading: true, error: undefined }))
+          )
+
+          const result = await fetchChildren(node)
+
+          // Update with children or error
+          setRootNodes((prev) =>
+            updateNodeByPath(prev, node.path, (n) => ({
+              ...n,
+              children: result.children,
+              error: result.error,
+              isLoaded: true,
+              isLoading: false,
+              isExpanded: true,
+            }))
+          )
+        } else {
+          setRootNodes((prev) =>
+            updateNodeByPath(prev, node.path, (n) => ({ ...n, isExpanded: true }))
+          )
+        }
       }
-    }
-  }, [fetchChildren, updateNodeByPath])
+    },
+    [fetchChildren, updateNodeByPath]
+  )
 
   const handleSelect = useCallback((node: FolderNode) => {
     setSelectedPath(node.path)
@@ -449,57 +455,63 @@ export function FolderTree({
     setSelectedFolderId(undefined)
   }, [])
 
-  const handleCreateFolder = useCallback(async (parentNode: FolderNode | null) => {
-    if (!newFolderName.trim()) return
+  const handleCreateFolder = useCallback(
+    async (parentNode: FolderNode | null) => {
+      if (!newFolderName.trim()) return
 
-    if (type === 'nas') {
-      return
-    }
-
-    if (!credentialId || !destinationId) return
-
-    setIsCreating(true)
-    try {
-      const response = await api.post<any>(
-        `/destinations/browse/${credentialId}/${destinationId}/folders`,
-        {
-          name: newFolderName.trim(),
-          parentFolderId: parentNode?.id,
-        }
-      )
-
-      if (response.success && response.data) {
-        const newNode: FolderNode = {
-          id: response.data.id,
-          name: response.data.name,
-          path: parentNode ? `${parentNode.path}/${response.data.name}` : `/${response.data.name}`,
-          children: [],
-          isLoaded: true,
-          isLoading: false,
-          isExpanded: false,
-        }
-
-        if (parentNode) {
-          setRootNodes((prev) =>
-            updateNodeByPath(prev, parentNode.path, (n) => ({
-              ...n,
-              children: [...n.children, newNode],
-              isExpanded: true,
-            }))
-          )
-        } else {
-          setRootNodes((prev) => [...prev, newNode])
-        }
-
-        setNewFolderName('')
-        setCreatingIn(null)
+      if (type === 'nas') {
+        return
       }
-    } catch (err) {
-      console.error('Failed to create folder:', err)
-    } finally {
-      setIsCreating(false)
-    }
-  }, [newFolderName, type, credentialId, destinationId, updateNodeByPath])
+
+      if (!credentialId || !destinationId) return
+
+      setIsCreating(true)
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response = await api.post<any>(
+          `/destinations/browse/${credentialId}/${destinationId}/folders`,
+          {
+            name: newFolderName.trim(),
+            parentFolderId: parentNode?.id,
+          }
+        )
+
+        if (response.success && response.data) {
+          const newNode: FolderNode = {
+            id: response.data.id,
+            name: response.data.name,
+            path: parentNode
+              ? `${parentNode.path}/${response.data.name}`
+              : `/${response.data.name}`,
+            children: [],
+            isLoaded: true,
+            isLoading: false,
+            isExpanded: false,
+          }
+
+          if (parentNode) {
+            setRootNodes((prev) =>
+              updateNodeByPath(prev, parentNode.path, (n) => ({
+                ...n,
+                children: [...n.children, newNode],
+                isExpanded: true,
+              }))
+            )
+          } else {
+            setRootNodes((prev) => [...prev, newNode])
+          }
+
+          setNewFolderName('')
+          setCreatingIn(null)
+        }
+      } catch (err) {
+        console.error('Failed to create folder:', err)
+      } finally {
+        setIsCreating(false)
+      }
+    },
+    [newFolderName, type, credentialId, destinationId, updateNodeByPath]
+  )
 
   const handleConfirm = useCallback(() => {
     onChange(selectedPath, selectedFolderId)

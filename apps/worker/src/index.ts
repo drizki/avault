@@ -29,7 +29,8 @@ function startHeartbeat() {
 
   // Send heartbeat every 30 seconds
   heartbeatInterval = setInterval(() => {
-    dashboardRedis.set('worker:heartbeat', Date.now().toString(), 'EX', 60)
+    dashboardRedis
+      .set('worker:heartbeat', Date.now().toString(), 'EX', 60)
       .catch((err) => logger.error({ err }, 'Failed to send heartbeat'))
   }, 30000)
 
@@ -37,6 +38,7 @@ function startHeartbeat() {
 }
 
 // Publish dashboard events to Redis
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function publishDashboardEvent(userId: string, event: any) {
   try {
     await dashboardRedis.publish(`dashboard:user:${userId}`, JSON.stringify(event))
@@ -151,8 +153,11 @@ const worker = new Worker<BackupJobData>(
       logger.info({ jobId }, 'Backup job completed successfully')
 
       return result
-    } catch (error: any) {
-      workerSystemLog.error(`Backup job failed: ${error.message}`, { jobId })
+    } catch (error: unknown) {
+      workerSystemLog.error(
+        `Backup job failed: ${error instanceof Error ? error.message : String(error)}`,
+        { jobId }
+      )
       logger.error({ jobId, error }, 'Backup job failed')
 
       await db.backupHistory.update({
@@ -160,8 +165,8 @@ const worker = new Worker<BackupJobData>(
         data: {
           status: BackupStatus.FAILED,
           completedAt: new Date(),
-          errorMessage: error.message,
-          errorStack: error.stack,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          errorStack: error instanceof Error ? error.stack : undefined,
         },
       })
 

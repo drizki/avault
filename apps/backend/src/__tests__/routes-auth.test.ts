@@ -114,7 +114,7 @@ describe('auth routes', () => {
       const res = await app.request('/api/auth/login/google', { method: 'POST' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.authUrl).toBe('https://accounts.google.com/oauth')
       expect(body.data.state).toBeDefined()
@@ -147,7 +147,7 @@ describe('auth routes', () => {
       const res = await app.request('/api/auth/logout', { method: 'POST' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.message).toBe('Logged out successfully')
     })
@@ -176,7 +176,7 @@ describe('auth routes', () => {
       const res = await app.request('/api/auth/me')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.email).toBe('test@example.com')
     })
@@ -187,7 +187,7 @@ describe('auth routes', () => {
       const res = await app.request('/api/auth/me')
 
       expect(res.status).toBe(404)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('User not found')
     })
 
@@ -208,7 +208,7 @@ describe('auth routes', () => {
       const res = await app.request('/api/auth/status')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.initialized).toBe(true)
       expect(body.data.allowSignups).toBe(true)
@@ -220,7 +220,7 @@ describe('auth routes', () => {
 
       const res = await app.request('/api/auth/status')
 
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.initialized).toBe(false)
     })
 
@@ -230,7 +230,7 @@ describe('auth routes', () => {
 
       const res = await app.request('/api/auth/status')
 
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.allowSignups).toBe(false)
     })
 
@@ -252,7 +252,7 @@ describe('auth routes', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.token).toBe('jwt-token-123')
     })
@@ -263,7 +263,7 @@ describe('auth routes', () => {
       const res = await app.request('/api/auth/token')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('No token found')
     })
   })
@@ -293,7 +293,9 @@ describe('auth routes', () => {
     })
 
     it('creates first user as ADMIN', async () => {
-      mocks.redisGet.mockResolvedValue(JSON.stringify({ provider: 'google', timestamp: Date.now() }))
+      mocks.redisGet.mockResolvedValue(
+        JSON.stringify({ provider: 'google', timestamp: Date.now() })
+      )
       mocks.redisDel.mockResolvedValue(1)
       mocks.exchangeCodeForTokens.mockResolvedValue({
         access_token: 'access-token',
@@ -333,7 +335,9 @@ describe('auth routes', () => {
     })
 
     it('creates subsequent user as USER', async () => {
-      mocks.redisGet.mockResolvedValue(JSON.stringify({ provider: 'google', timestamp: Date.now() }))
+      mocks.redisGet.mockResolvedValue(
+        JSON.stringify({ provider: 'google', timestamp: Date.now() })
+      )
       mocks.redisDel.mockResolvedValue(1)
       mocks.exchangeCodeForTokens.mockResolvedValue({
         access_token: 'access-token',
@@ -368,7 +372,9 @@ describe('auth routes', () => {
     })
 
     it('rejects signup when signups are disabled', async () => {
-      mocks.redisGet.mockResolvedValue(JSON.stringify({ provider: 'google', timestamp: Date.now() }))
+      mocks.redisGet.mockResolvedValue(
+        JSON.stringify({ provider: 'google', timestamp: Date.now() })
+      )
       mocks.redisDel.mockResolvedValue(1)
       mocks.exchangeCodeForTokens.mockResolvedValue({
         access_token: 'access-token',
@@ -390,7 +396,9 @@ describe('auth routes', () => {
     })
 
     it('allows existing user login even when signups disabled', async () => {
-      mocks.redisGet.mockResolvedValue(JSON.stringify({ provider: 'google', timestamp: Date.now() }))
+      mocks.redisGet.mockResolvedValue(
+        JSON.stringify({ provider: 'google', timestamp: Date.now() })
+      )
       mocks.redisDel.mockResolvedValue(1)
       mocks.exchangeCodeForTokens.mockResolvedValue({
         access_token: 'access-token',
@@ -421,11 +429,13 @@ describe('auth routes', () => {
     })
 
     it('handles credential OAuth flow', async () => {
-      const credentialState = Buffer.from(JSON.stringify({
-        flow: 'credential',
-        userId: 'user-123',
-        provider: 'google_drive_shared',
-      })).toString('base64url')
+      const credentialState = Buffer.from(
+        JSON.stringify({
+          flow: 'credential',
+          userId: 'user-123',
+          provider: 'google_drive_shared',
+        })
+      ).toString('base64url')
 
       mocks.exchangeCodeForTokens.mockResolvedValue({
         access_token: 'access-token',
@@ -444,7 +454,9 @@ describe('auth routes', () => {
       })
       mocks.credentialCreate.mockResolvedValue({ id: 'cred-new' })
 
-      const res = await app.request(`/api/auth/callback/google?code=valid-code&state=${credentialState}`)
+      const res = await app.request(
+        `/api/auth/callback/google?code=valid-code&state=${credentialState}`
+      )
 
       expect(res.status).toBe(302)
       expect(res.headers.get('location')).toContain('success=credential_added')
@@ -452,34 +464,44 @@ describe('auth routes', () => {
     })
 
     it('handles credential OAuth failure', async () => {
-      const credentialState = Buffer.from(JSON.stringify({
-        flow: 'credential',
-        userId: 'user-123',
-        provider: 'google_drive_my_drive',
-      })).toString('base64url')
+      const credentialState = Buffer.from(
+        JSON.stringify({
+          flow: 'credential',
+          userId: 'user-123',
+          provider: 'google_drive_my_drive',
+        })
+      ).toString('base64url')
 
       mocks.exchangeCodeForTokens.mockRejectedValue(new Error('Token exchange failed'))
 
-      const res = await app.request(`/api/auth/callback/google?code=invalid-code&state=${credentialState}`)
+      const res = await app.request(
+        `/api/auth/callback/google?code=invalid-code&state=${credentialState}`
+      )
 
       expect(res.status).toBe(302)
       expect(res.headers.get('location')).toContain('error=oauth_failed')
     })
 
     it('handles missing userId in credential flow', async () => {
-      const credentialState = Buffer.from(JSON.stringify({
-        flow: 'credential',
-        // No userId
-      })).toString('base64url')
+      const credentialState = Buffer.from(
+        JSON.stringify({
+          flow: 'credential',
+          // No userId
+        })
+      ).toString('base64url')
 
-      const res = await app.request(`/api/auth/callback/google?code=valid-code&state=${credentialState}`)
+      const res = await app.request(
+        `/api/auth/callback/google?code=valid-code&state=${credentialState}`
+      )
 
       expect(res.status).toBe(302)
       expect(res.headers.get('location')).toContain('error=invalid_state')
     })
 
     it('handles OAuth error gracefully', async () => {
-      mocks.redisGet.mockResolvedValue(JSON.stringify({ provider: 'google', timestamp: Date.now() }))
+      mocks.redisGet.mockResolvedValue(
+        JSON.stringify({ provider: 'google', timestamp: Date.now() })
+      )
       mocks.redisDel.mockResolvedValue(1)
       mocks.exchangeCodeForTokens.mockRejectedValue(new Error('OAuth error'))
 
@@ -490,36 +512,44 @@ describe('auth routes', () => {
     })
 
     it('handles missing access_token in credential OAuth response', async () => {
-      const credentialState = Buffer.from(JSON.stringify({
-        flow: 'credential',
-        userId: 'user-123',
-        provider: 'google_drive_shared',
-      })).toString('base64url')
+      const credentialState = Buffer.from(
+        JSON.stringify({
+          flow: 'credential',
+          userId: 'user-123',
+          provider: 'google_drive_shared',
+        })
+      ).toString('base64url')
 
       mocks.exchangeCodeForTokens.mockResolvedValue({
         // Missing access_token
         refresh_token: 'refresh-token',
       })
 
-      const res = await app.request(`/api/auth/callback/google?code=valid-code&state=${credentialState}`)
+      const res = await app.request(
+        `/api/auth/callback/google?code=valid-code&state=${credentialState}`
+      )
 
       expect(res.status).toBe(302)
       expect(res.headers.get('location')).toContain('error=oauth_failed')
     })
 
     it('handles missing refresh_token in credential OAuth response', async () => {
-      const credentialState = Buffer.from(JSON.stringify({
-        flow: 'credential',
-        userId: 'user-123',
-        provider: 'google_drive_shared',
-      })).toString('base64url')
+      const credentialState = Buffer.from(
+        JSON.stringify({
+          flow: 'credential',
+          userId: 'user-123',
+          provider: 'google_drive_shared',
+        })
+      ).toString('base64url')
 
       mocks.exchangeCodeForTokens.mockResolvedValue({
         access_token: 'access-token',
         // Missing refresh_token
       })
 
-      const res = await app.request(`/api/auth/callback/google?code=valid-code&state=${credentialState}`)
+      const res = await app.request(
+        `/api/auth/callback/google?code=valid-code&state=${credentialState}`
+      )
 
       expect(res.status).toBe(302)
       expect(res.headers.get('location')).toContain('error=oauth_failed')

@@ -12,6 +12,7 @@ credentials.use('*', requireAuth)
 // List all credentials (filtered by user)
 credentials.get('/', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   const allCredentials = await db.storageCredential.findMany({
@@ -37,6 +38,7 @@ credentials.get('/', async (c) => {
 // Get single credential (user's own only)
 credentials.get('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -62,6 +64,7 @@ credentials.get('/:id', async (c) => {
 // Delete credential (user's own only)
 credentials.delete('/:id', async (c) => {
   const db = c.get('db')
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const id = c.req.param('id')
 
@@ -72,10 +75,13 @@ credentials.delete('/:id', async (c) => {
     })
 
     if (!credential) {
-      return c.json({
-        success: false,
-        error: 'Credential not found',
-      }, 404)
+      return c.json(
+        {
+          success: false,
+          error: 'Credential not found',
+        },
+        404
+      )
     }
 
     await db.storageCredential.delete({ where: { id } })
@@ -84,11 +90,14 @@ credentials.delete('/:id', async (c) => {
       success: true,
       message: 'Credential deleted successfully',
     })
-  } catch (error) {
-    return c.json({
-      success: false,
-      error: 'Failed to delete credential',
-    }, 500)
+  } catch {
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to delete credential',
+      },
+      500
+    )
   }
 })
 
@@ -98,6 +107,7 @@ credentials.delete('/:id', async (c) => {
 
 // Initiate Google Drive OAuth flow (supports both Shared Drives and My Drive)
 credentials.post('/google-drive/auth', async (c) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
 
   try {
@@ -112,9 +122,9 @@ credentials.post('/google-drive/auth', async (c) => {
     )
 
     // Generate state parameter with userId, flow type, and provider
-    const state = Buffer.from(
-      JSON.stringify({ userId, flow: 'credential', provider })
-    ).toString('base64url')
+    const state = Buffer.from(JSON.stringify({ userId, flow: 'credential', provider })).toString(
+      'base64url'
+    )
 
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
@@ -133,12 +143,18 @@ credentials.post('/google-drive/auth', async (c) => {
       success: true,
       data: { authUrl, state },
     })
-  } catch (error: any) {
-    logger.error({ error: error.message, userId }, 'Failed to initiate Google Drive OAuth')
-    return c.json({
-      success: false,
-      error: 'Failed to initiate OAuth flow',
-    }, 500)
+  } catch (error: unknown) {
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error), userId },
+      'Failed to initiate Google Drive OAuth'
+    )
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to initiate OAuth flow',
+      },
+      500
+    )
   }
 })
 
@@ -148,6 +164,7 @@ credentials.post('/google-drive/auth', async (c) => {
 
 // Create credential from API keys
 credentials.post('/api-key', async (c) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const db = c.get('db')
 
@@ -157,26 +174,35 @@ credentials.post('/api-key', async (c) => {
     // Validate provider supports API key auth
     const apiKeyProviders = ['s3', 'cloudflare_r2', 'digitalocean_spaces']
     if (!apiKeyProviders.includes(provider)) {
-      return c.json({
-        success: false,
-        error: 'Invalid provider for API key authentication',
-      }, 400)
+      return c.json(
+        {
+          success: false,
+          error: 'Invalid provider for API key authentication',
+        },
+        400
+      )
     }
 
     // Validate required fields based on provider
     if (!credentialData.access_key_id || !credentialData.secret_access_key) {
-      return c.json({
-        success: false,
-        error: 'Access key ID and secret access key are required',
-      }, 400)
+      return c.json(
+        {
+          success: false,
+          error: 'Access key ID and secret access key are required',
+        },
+        400
+      )
     }
 
     // For Cloudflare R2, account_id is required
     if (provider === 'cloudflare_r2' && !credentialData.account_id) {
-      return c.json({
-        success: false,
-        error: 'Cloudflare account ID is required for R2',
-      }, 400)
+      return c.json(
+        {
+          success: false,
+          error: 'Cloudflare account ID is required for R2',
+        },
+        400
+      )
     }
 
     // Encrypt credential data
@@ -203,17 +229,26 @@ credentials.post('/api-key', async (c) => {
 
     logger.info({ userId, provider, credentialId: credential.id }, 'API key credential created')
 
-    return c.json({
-      success: true,
-      data: credential,
-    }, 201)
-  } catch (error: any) {
-    logger.error({ error: error.message, userId }, 'Failed to create API key credential')
-    return c.json({
-      success: false,
-      error: 'Failed to create credential',
-      details: error.message,
-    }, 500)
+    return c.json(
+      {
+        success: true,
+        data: credential,
+      },
+      201
+    )
+  } catch (error: unknown) {
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error), userId },
+      'Failed to create API key credential'
+    )
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to create credential',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
@@ -223,6 +258,7 @@ credentials.post('/api-key', async (c) => {
 
 // Create credential from service account JSON
 credentials.post('/service-account', async (c) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userId = c.get('userId')!
   const db = c.get('db')
 
@@ -231,10 +267,13 @@ credentials.post('/service-account', async (c) => {
 
     // Only GCS uses service accounts currently
     if (provider !== 'google_cloud_storage') {
-      return c.json({
-        success: false,
-        error: 'Invalid provider for service account authentication',
-      }, 400)
+      return c.json(
+        {
+          success: false,
+          error: 'Invalid provider for service account authentication',
+        },
+        400
+      )
     }
 
     // Parse service account JSON if it's a string
@@ -243,19 +282,29 @@ credentials.post('/service-account', async (c) => {
       try {
         serviceAccount = JSON.parse(credentialData)
       } catch {
-        return c.json({
-          success: false,
-          error: 'Invalid service account JSON',
-        }, 400)
+        return c.json(
+          {
+            success: false,
+            error: 'Invalid service account JSON',
+          },
+          400
+        )
       }
     }
 
     // Validate service account structure
-    if (serviceAccount.type !== 'service_account' || !serviceAccount.project_id || !serviceAccount.private_key) {
-      return c.json({
-        success: false,
-        error: 'Invalid service account JSON structure',
-      }, 400)
+    if (
+      serviceAccount.type !== 'service_account' ||
+      !serviceAccount.project_id ||
+      !serviceAccount.private_key
+    ) {
+      return c.json(
+        {
+          success: false,
+          error: 'Invalid service account JSON structure',
+        },
+        400
+      )
     }
 
     // Encrypt credential data
@@ -282,19 +331,31 @@ credentials.post('/service-account', async (c) => {
       },
     })
 
-    logger.info({ userId, provider, credentialId: credential.id, projectId: serviceAccount.project_id }, 'Service account credential created')
+    logger.info(
+      { userId, provider, credentialId: credential.id, projectId: serviceAccount.project_id },
+      'Service account credential created'
+    )
 
-    return c.json({
-      success: true,
-      data: credential,
-    }, 201)
-  } catch (error: any) {
-    logger.error({ error: error.message, userId }, 'Failed to create service account credential')
-    return c.json({
-      success: false,
-      error: 'Failed to create credential',
-      details: error.message,
-    }, 500)
+    return c.json(
+      {
+        success: true,
+        data: credential,
+      },
+      201
+    )
+  } catch (error: unknown) {
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error), userId },
+      'Failed to create service account credential'
+    )
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to create credential',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 

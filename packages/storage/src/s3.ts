@@ -62,7 +62,9 @@ export class S3Adapter extends StorageAdapter {
     const response = await this.client.send(new ListBucketsCommand({}))
 
     return (response.Buckets || []).map((bucket) => ({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       id: bucket.Name!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       name: bucket.Name!,
       provider: this.provider,
       metadata: {
@@ -85,6 +87,7 @@ export class S3Adapter extends StorageAdapter {
     )
 
     return (response.CommonPrefixes || []).map((prefixObj) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const fullPath = prefixObj.Prefix!
       const name = fullPath.slice(normalizedPrefix.length).replace(/\/$/, '')
       return {
@@ -98,9 +101,7 @@ export class S3Adapter extends StorageAdapter {
   async uploadFile(params: UploadFileParams): Promise<UploadFileResult> {
     if (!this.client) throw new Error('Adapter not initialized')
 
-    const key = params.folderPath
-      ? `${params.folderPath}/${params.fileName}`
-      : params.fileName
+    const key = params.folderPath ? `${params.folderPath}/${params.fileName}` : params.fileName
 
     const upload = new Upload({
       client: this.client,
@@ -132,7 +133,11 @@ export class S3Adapter extends StorageAdapter {
     }
   }
 
-  async createFolder(bucketName: string, name: string, parentPath?: string): Promise<StorageFolder> {
+  async createFolder(
+    bucketName: string,
+    name: string,
+    parentPath?: string
+  ): Promise<StorageFolder> {
     if (!this.client) throw new Error('Adapter not initialized')
 
     // S3 doesn't have real folders - we create a placeholder object
@@ -178,6 +183,7 @@ export class S3Adapter extends StorageAdapter {
     }
 
     // Delete all objects in batches of 1000 (S3 limit)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const objectsToDelete = listResponse.Contents.map((obj) => ({ Key: obj.Key! }))
 
     for (let i = 0; i < objectsToDelete.length; i += 1000) {
@@ -205,6 +211,7 @@ export class S3Adapter extends StorageAdapter {
     )
 
     return (response.CommonPrefixes || []).map((prefixObj) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const fullPath = prefixObj.Prefix!
       const name = fullPath.slice(prefix.length).replace(/\/$/, '')
       return {

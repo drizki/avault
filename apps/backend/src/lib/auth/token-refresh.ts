@@ -29,16 +29,17 @@ export async function getValidGoogleTokens(
     where: { id: credentialId },
   })
 
-  if (!credential || !GOOGLE_OAUTH_PROVIDERS.includes(credential.provider as typeof GOOGLE_OAUTH_PROVIDERS[number])) {
-    throw new Error(`Credential not found or invalid provider. Expected one of: ${GOOGLE_OAUTH_PROVIDERS.join(', ')}`)
+  if (
+    !credential ||
+    !GOOGLE_OAUTH_PROVIDERS.includes(credential.provider as (typeof GOOGLE_OAUTH_PROVIDERS)[number])
+  ) {
+    throw new Error(
+      `Credential not found or invalid provider. Expected one of: ${GOOGLE_OAUTH_PROVIDERS.join(', ')}`
+    )
   }
 
   // Decrypt stored credentials
-  const decryptedData = decrypt(
-    credential.encryptedData,
-    credential.iv,
-    credential.authTag
-  )
+  const decryptedData = decrypt(credential.encryptedData, credential.iv, credential.authTag)
   const credentials: StoredCredentials = JSON.parse(decryptedData)
 
   // Check if access token is expired or about to expire (within 5 minutes)
@@ -70,17 +71,17 @@ export async function getValidGoogleTokens(
 
     // Update stored credentials
     const updatedCredentials: StoredCredentials = {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       access_token: newTokens.access_token!,
       refresh_token: credentials.refresh_token, // Refresh token stays the same
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expiry_date: newTokens.expiry_date!,
       token_type: newTokens.token_type || 'Bearer',
       scope: credentials.scope,
     }
 
     // Encrypt and save updated credentials
-    const { encryptedData, iv, authTag } = encrypt(
-      JSON.stringify(updatedCredentials)
-    )
+    const { encryptedData, iv, authTag } = encrypt(JSON.stringify(updatedCredentials))
 
     await db.storageCredential.update({
       where: { id: credentialId },
@@ -94,9 +95,9 @@ export async function getValidGoogleTokens(
     logger.info({ credentialId }, 'Google OAuth token refreshed successfully')
 
     return updatedCredentials
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
-      { error: error.message, credentialId },
+      { error: error instanceof Error ? error.message : String(error), credentialId },
       'Failed to refresh Google OAuth token'
     )
     throw new Error('Failed to refresh access token. Credential may need re-authorization.')

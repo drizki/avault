@@ -5,10 +5,9 @@ type BackupJobWithRelations = Prisma.BackupJobGetPayload<{
   include: { destination: true; credential: true }
 }>
 import { systemLog } from '../log-stream'
-import { getNextRunTime, isJobDue } from './cron-utils'
+import { getNextRunTime } from './cron-utils'
 import { acquireJobLock, releaseJobLock } from './job-lock'
 import { queueBackupJob } from '../queue'
-import type { BackupJobData } from '@avault/shared'
 
 export class BackupScheduler {
   private intervalId: NodeJS.Timeout | null = null
@@ -21,7 +20,8 @@ export class BackupScheduler {
     private redis: Redis,
     checkInterval?: number
   ) {
-    this.checkInterval = checkInterval || parseInt(process.env.SCHEDULER_CHECK_INTERVAL || '60000', 10)
+    this.checkInterval =
+      checkInterval || parseInt(process.env.SCHEDULER_CHECK_INTERVAL || '60000', 10)
     this.lockTTL = parseInt(process.env.SCHEDULER_LOCK_TTL || '60000', 10)
   }
 
@@ -99,8 +99,11 @@ export class BackupScheduler {
       for (const job of dueJobs) {
         await this.processJob(job)
       }
-    } catch (error: any) {
-      logger.error({ error: error.message }, 'Error in scheduler tick')
+    } catch (error: unknown) {
+      logger.error(
+        { error: error instanceof Error ? error.message : String(error) },
+        'Error in scheduler tick'
+      )
     } finally {
       this.isRunning = false
     }
@@ -191,9 +194,13 @@ export class BackupScheduler {
             nextRunAt: nextRunAt?.toISOString(),
           })
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error(
-          { jobId: job.id, error: error.message, stack: error.stack },
+          {
+            jobId: job.id,
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          },
           'Failed to process scheduled job'
         )
         throw error // Re-throw to ensure lock is released
@@ -201,9 +208,9 @@ export class BackupScheduler {
         // Always release lock
         await releaseJobLock(this.redis, job.id)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(
-        { jobId: job.id, error: error.message },
+        { jobId: job.id, error: error instanceof Error ? error.message : String(error) },
         'Error processing scheduled job'
       )
     }
@@ -227,10 +234,7 @@ export class BackupScheduler {
         },
       })
 
-      logger.info(
-        { jobsToRecalculate: jobs.length },
-        'Recalculating schedules for jobs'
-      )
+      logger.info({ jobsToRecalculate: jobs.length }, 'Recalculating schedules for jobs')
 
       let recalculatedCount = 0
       for (const job of jobs) {
@@ -244,17 +248,20 @@ export class BackupScheduler {
 
           recalculatedCount++
           logger.info({ jobId: job.id, nextRunAt }, 'Recalculated job schedule')
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error(
-            { jobId: job.id, error: error.message },
+            { jobId: job.id, error: error instanceof Error ? error.message : String(error) },
             'Failed to recalculate schedule'
           )
         }
       }
 
       logger.info({ recalculatedCount }, 'Recalculated schedules for all jobs')
-    } catch (error: any) {
-      logger.error({ error: error.message }, 'Error recalculating schedules')
+    } catch (error: unknown) {
+      logger.error(
+        { error: error instanceof Error ? error.message : String(error) },
+        'Error recalculating schedules'
+      )
     }
   }
 }
@@ -264,10 +271,7 @@ let schedulerInstance: BackupScheduler | null = null
 
 export function initScheduler(db: PrismaClient, redis: Redis): BackupScheduler {
   if (!schedulerInstance) {
-    const checkInterval = parseInt(
-      process.env.SCHEDULER_CHECK_INTERVAL || '60000',
-      10
-    )
+    const checkInterval = parseInt(process.env.SCHEDULER_CHECK_INTERVAL || '60000', 10)
     schedulerInstance = new BackupScheduler(db, redis, checkInterval)
   }
   return schedulerInstance

@@ -10,7 +10,9 @@ export interface JWTPayload {
 
 // JWT_SECRET is required - fail fast if not configured
 if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required. Generate one with: openssl rand -base64 32')
+  throw new Error(
+    'JWT_SECRET environment variable is required. Generate one with: openssl rand -base64 32'
+  )
 }
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
@@ -44,7 +46,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET)
     return payload as unknown as JWTPayload
-  } catch (error) {
+  } catch {
     // Token is invalid or expired
     return null
   }

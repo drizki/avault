@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -19,7 +20,11 @@ vi.mock('@aws-sdk/lib-storage', () => ({
   Upload: vi.fn(),
 }))
 
-import { S3CompatibleAdapter, CloudflareR2Adapter, DigitalOceanSpacesAdapter } from '../s3-compatible'
+import {
+  S3CompatibleAdapter,
+  CloudflareR2Adapter,
+  DigitalOceanSpacesAdapter,
+} from '../s3-compatible'
 
 describe('S3CompatibleAdapter', () => {
   beforeEach(() => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // Mock logger
@@ -174,7 +175,6 @@ describe('LogBuffer', () => {
       // Should have called createMany at least twice
       expect(mockDb.logEntry.createMany.mock.calls.length).toBeGreaterThanOrEqual(2)
     })
-
   })
 
   describe('log entry format', () => {

@@ -33,7 +33,8 @@ export function EnableJobDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Enable Backup Job?</AlertDialogTitle>
           <AlertDialogDescription>
-            <span className="font-medium text-foreground">"{jobName}"</span> has been created successfully.
+            <span className="font-medium text-foreground">"{jobName}"</span> has been created
+            successfully.
           </AlertDialogDescription>
         </AlertDialogHeader>
 

@@ -10,7 +10,7 @@ export function validateCronExpression(expression: string): boolean {
   try {
     CronExpressionParser.parse(expression)
     return true
-  } catch (error) {
+  } catch {
     return false
   }
 }
@@ -29,9 +29,9 @@ export function getNextRunTime(cronExpression: string, fromDate?: Date): Date {
       tz: 'UTC',
     })
     return interval.next().toDate()
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
-      { error: error.message, cronExpression },
+      { error: error instanceof Error ? error.message : String(error), cronExpression },
       'Failed to calculate next run time'
     )
     // Fallback: return 1 hour from now
@@ -47,10 +47,7 @@ export function getNextRunTime(cronExpression: string, fromDate?: Date): Date {
  * @param lastRun - Last run date (null if never run)
  * @returns Next run date
  */
-export function calculateNextRun(
-  cronExpression: string,
-  lastRun: Date | null
-): Date {
+export function calculateNextRun(cronExpression: string, lastRun: Date | null): Date {
   const from = lastRun || new Date()
   return getNextRunTime(cronExpression, from)
 }

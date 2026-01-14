@@ -34,8 +34,7 @@ function RootLayout() {
 
   // Pages that should not use the dashboard layout
   const isAuthPage =
-    location.pathname === '/login' ||
-    location.pathname.startsWith('/auth/callback')
+    location.pathname === '/login' || location.pathname.startsWith('/auth/callback')
 
   // If authenticated and not on auth page, use dashboard layout
   if (isAuthenticated && !isAuthPage) {

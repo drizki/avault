@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -133,13 +134,9 @@ describe('GoogleCloudStorageAdapter', () => {
     it('lists folders with prefix', async () => {
       await adapter.initialize(credentials)
 
-      mocks.getFiles.mockResolvedValue([
-        [],
-        null,
-        { prefixes: ['data/subdir1/', 'data/subdir2/'] },
-      ])
+      mocks.getFiles.mockResolvedValue([[], null, { prefixes: ['data/subdir1/', 'data/subdir2/'] }])
 
-      const folders = await adapter.listFolders('bucket-1', 'data')
+      const _folders = await adapter.listFolders('bucket-1', 'data')
 
       expect(mocks.getFiles).toHaveBeenCalledWith({
         prefix: 'data/',
@@ -256,7 +253,7 @@ describe('GoogleCloudStorageAdapter', () => {
         { prefixes: ['backups/backup-1/', 'backups/backup-2/'] },
       ])
 
-      const backups = await adapter.listBackups('bucket-1', 'backups')
+      const _backups = await adapter.listBackups('bucket-1', 'backups')
 
       expect(mocks.getFiles).toHaveBeenCalledWith({
         prefix: 'backups/',

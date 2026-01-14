@@ -73,7 +73,7 @@ describe('GoogleOAuthClient', () => {
     it('passes state parameter', () => {
       mocks.generateAuthUrl.mockReturnValue('https://accounts.google.com/oauth?state=custom-state')
 
-      const url = client.generateAuthUrl('custom-state')
+      client.generateAuthUrl('custom-state')
 
       expect(mocks.generateAuthUrl).toHaveBeenCalledWith(
         expect.objectContaining({ state: 'custom-state' })

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -708,11 +709,11 @@ describe('executeBackupJob', () => {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
     mocks.adapterListBackups.mockResolvedValue([
-      { path: '/backup-1', createdTime: oneDayAgo },      // Keep (within version count)
-      { path: '/backup-2', createdTime: fiveDaysAgo },    // Keep (within version count)
-      { path: '/backup-3', createdTime: tenDaysAgo },     // Keep (within version count OR days)
-      { path: '/backup-4', createdTime: twentyDaysAgo },  // Delete (outside count and days)
-      { path: '/backup-5', createdTime: thirtyDaysAgo },  // Delete (outside count and days)
+      { path: '/backup-1', createdTime: oneDayAgo }, // Keep (within version count)
+      { path: '/backup-2', createdTime: fiveDaysAgo }, // Keep (within version count)
+      { path: '/backup-3', createdTime: tenDaysAgo }, // Keep (within version count OR days)
+      { path: '/backup-4', createdTime: twentyDaysAgo }, // Delete (outside count and days)
+      { path: '/backup-5', createdTime: thirtyDaysAgo }, // Delete (outside count and days)
     ])
     mocks.adapterDeleteFolder.mockResolvedValue(undefined)
 
@@ -876,9 +877,7 @@ describe('executeBackupJob', () => {
         { name: 'root.txt', isDirectory: () => false, isFile: () => true },
       ])
       // Second call (subdir) returns a file
-      .mockResolvedValueOnce([
-        { name: 'nested.txt', isDirectory: () => false, isFile: () => true },
-      ])
+      .mockResolvedValueOnce([{ name: 'nested.txt', isDirectory: () => false, isFile: () => true }])
 
     mocks.stat.mockResolvedValue({ size: 100 })
     mocks.credentialFindUnique.mockResolvedValue({

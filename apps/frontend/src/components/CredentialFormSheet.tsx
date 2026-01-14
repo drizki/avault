@@ -69,8 +69,20 @@ const PROVIDER_CONFIGS: ProviderConfig[] = [
     authType: 'service_account',
     icon: '/icons/google_cloud_storage.svg',
     fields: [
-      { key: 'name', label: 'Credential Name', type: 'text', placeholder: 'My GCS Account', required: true },
-      { key: 'serviceAccountJson', label: 'Service Account JSON', type: 'textarea', placeholder: 'Paste your service account JSON key here...', required: true },
+      {
+        key: 'name',
+        label: 'Credential Name',
+        type: 'text',
+        placeholder: 'My GCS Account',
+        required: true,
+      },
+      {
+        key: 'serviceAccountJson',
+        label: 'Service Account JSON',
+        type: 'textarea',
+        placeholder: 'Paste your service account JSON key here...',
+        required: true,
+      },
     ],
   },
   {
@@ -80,9 +92,27 @@ const PROVIDER_CONFIGS: ProviderConfig[] = [
     authType: 'api_key',
     icon: '/icons/amazon_s3.svg',
     fields: [
-      { key: 'name', label: 'Credential Name', type: 'text', placeholder: 'My S3 Account', required: true },
-      { key: 'accessKeyId', label: 'Access Key ID', type: 'text', placeholder: 'AKIAIOSFODNN7EXAMPLE', required: true },
-      { key: 'secretAccessKey', label: 'Secret Access Key', type: 'password', placeholder: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', required: true },
+      {
+        key: 'name',
+        label: 'Credential Name',
+        type: 'text',
+        placeholder: 'My S3 Account',
+        required: true,
+      },
+      {
+        key: 'accessKeyId',
+        label: 'Access Key ID',
+        type: 'text',
+        placeholder: 'AKIAIOSFODNN7EXAMPLE',
+        required: true,
+      },
+      {
+        key: 'secretAccessKey',
+        label: 'Secret Access Key',
+        type: 'password',
+        placeholder: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+        required: true,
+      },
       {
         key: 'region',
         label: 'Region',
@@ -114,10 +144,34 @@ const PROVIDER_CONFIGS: ProviderConfig[] = [
     authType: 'api_key',
     icon: '/icons/cloudflare_r2.svg',
     fields: [
-      { key: 'name', label: 'Credential Name', type: 'text', placeholder: 'My R2 Account', required: true },
-      { key: 'accountId', label: 'Account ID', type: 'text', placeholder: 'Your Cloudflare Account ID', required: true },
-      { key: 'accessKeyId', label: 'Access Key ID', type: 'text', placeholder: 'R2 Access Key ID', required: true },
-      { key: 'secretAccessKey', label: 'Secret Access Key', type: 'password', placeholder: 'R2 Secret Access Key', required: true },
+      {
+        key: 'name',
+        label: 'Credential Name',
+        type: 'text',
+        placeholder: 'My R2 Account',
+        required: true,
+      },
+      {
+        key: 'accountId',
+        label: 'Account ID',
+        type: 'text',
+        placeholder: 'Your Cloudflare Account ID',
+        required: true,
+      },
+      {
+        key: 'accessKeyId',
+        label: 'Access Key ID',
+        type: 'text',
+        placeholder: 'R2 Access Key ID',
+        required: true,
+      },
+      {
+        key: 'secretAccessKey',
+        label: 'Secret Access Key',
+        type: 'password',
+        placeholder: 'R2 Secret Access Key',
+        required: true,
+      },
     ],
   },
   {
@@ -127,9 +181,27 @@ const PROVIDER_CONFIGS: ProviderConfig[] = [
     authType: 'api_key',
     icon: '/icons/digitalocean_spaces.svg',
     fields: [
-      { key: 'name', label: 'Credential Name', type: 'text', placeholder: 'My Spaces Account', required: true },
-      { key: 'accessKeyId', label: 'Access Key', type: 'text', placeholder: 'Spaces Access Key', required: true },
-      { key: 'secretAccessKey', label: 'Secret Key', type: 'password', placeholder: 'Spaces Secret Key', required: true },
+      {
+        key: 'name',
+        label: 'Credential Name',
+        type: 'text',
+        placeholder: 'My Spaces Account',
+        required: true,
+      },
+      {
+        key: 'accessKeyId',
+        label: 'Access Key',
+        type: 'text',
+        placeholder: 'Spaces Access Key',
+        required: true,
+      },
+      {
+        key: 'secretAccessKey',
+        label: 'Secret Key',
+        type: 'password',
+        placeholder: 'Spaces Secret Key',
+        required: true,
+      },
       {
         key: 'region',
         label: 'Region',
@@ -159,7 +231,7 @@ export function CredentialFormSheet({
   open,
   onOpenChange,
   onSuccess,
-  initialProvider
+  initialProvider,
 }: CredentialFormSheetProps) {
   const [selectedProvider, setSelectedProvider] = useState<ProviderConfig | null>(null)
   const [formData, setFormData] = useState<Record<string, string>>({})
@@ -172,7 +244,7 @@ export function CredentialFormSheet({
       setFormData({})
       setError(null)
       if (initialProvider) {
-        const config = PROVIDER_CONFIGS.find(p => p.id === initialProvider)
+        const config = PROVIDER_CONFIGS.find((p) => p.id === initialProvider)
         if (config) {
           setSelectedProvider(config)
           setStep(config.authType === 'oauth' ? 'select-provider' : 'form')
@@ -185,7 +257,7 @@ export function CredentialFormSheet({
   }, [open, initialProvider])
 
   function getProviderIcon(provider: string) {
-    const config = PROVIDER_CONFIGS.find(p => p.id === provider)
+    const config = PROVIDER_CONFIGS.find((p) => p.id === provider)
     if (config) {
       return <img src={config.icon} alt={config.name} className="w-5 h-5" />
     }
@@ -200,7 +272,7 @@ export function CredentialFormSheet({
       // Redirect to OAuth flow
       try {
         const response = await api.post<{ authUrl: string }>('/credentials/google-drive/auth', {
-          provider: provider.id
+          provider: provider.id,
         })
         if (response.success && response.data) {
           window.location.href = response.data.authUrl
@@ -340,14 +412,14 @@ export function CredentialFormSheet({
                       <div className="text-xs text-muted-foreground">{provider.description}</div>
                     </div>
                     {provider.authType === 'oauth' && (
-                      <span className="text-xs text-muted-foreground px-2 py-1 bg-secondary rounded">OAuth</span>
+                      <span className="text-xs text-muted-foreground px-2 py-1 bg-secondary rounded">
+                        OAuth
+                      </span>
                     )}
                   </button>
                 ))}
               </div>
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
           )}
 
@@ -384,9 +456,7 @@ export function CredentialFormSheet({
                 </div>
               ))}
 
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
 
               <SheetFooter className="pt-4">
                 <Button

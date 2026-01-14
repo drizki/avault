@@ -74,12 +74,6 @@ export class GoogleCloudStorageAdapter extends StorageAdapter {
     const bucket = this.storage.bucket(bucketName)
     const normalizedPrefix = prefix ? (prefix.endsWith('/') ? prefix : `${prefix}/`) : ''
 
-    const [files] = await bucket.getFiles({
-      prefix: normalizedPrefix,
-      delimiter: '/',
-      autoPaginate: false,
-    })
-
     // GCS returns prefixes in the apiResponse, not in files array for delimiter queries
     const [, , apiResponse] = await bucket.getFiles({
       prefix: normalizedPrefix,
@@ -103,9 +97,7 @@ export class GoogleCloudStorageAdapter extends StorageAdapter {
     if (!this.storage) throw new Error('Adapter not initialized')
 
     const bucket = this.storage.bucket(params.destinationId)
-    const key = params.folderPath
-      ? `${params.folderPath}/${params.fileName}`
-      : params.fileName
+    const key = params.folderPath ? `${params.folderPath}/${params.fileName}` : params.fileName
 
     const file = bucket.file(key)
 
@@ -144,7 +136,11 @@ export class GoogleCloudStorageAdapter extends StorageAdapter {
     })
   }
 
-  async createFolder(bucketName: string, name: string, parentPath?: string): Promise<StorageFolder> {
+  async createFolder(
+    bucketName: string,
+    name: string,
+    parentPath?: string
+  ): Promise<StorageFolder> {
     if (!this.storage) throw new Error('Adapter not initialized')
 
     // GCS doesn't have real folders - create a placeholder

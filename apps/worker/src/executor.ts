@@ -1,9 +1,5 @@
 import { PrismaClient, logger, decrypt } from '@avault/shared'
-import type {
-  BackupJobExecution,
-  BackupExecutionResult,
-  BackupJobProgress,
-} from '@avault/shared'
+import type { BackupJobExecution, BackupExecutionResult, BackupJobProgress } from '@avault/shared'
 import { getStorageAdapter, type StorageAdapter } from '@avault/storage'
 import { promises as fs, createReadStream } from 'fs'
 import path from 'path'
@@ -13,7 +9,7 @@ import { createLogPublisher } from './lib/log-stream'
 import pLimit from 'p-limit'
 
 const NAS_MOUNT_PATH = process.env.NAS_MOUNT_PATH || ''
-const TEMP_DIR = process.env.TEMP_DIR || '/tmp/avault-backups'
+const _TEMP_DIR = process.env.TEMP_DIR || '/tmp/avault-backups'
 
 // Upload performance configuration
 const CONCURRENT_UPLOADS = parseInt(process.env.CONCURRENT_UPLOADS || '10', 10)
@@ -29,11 +25,14 @@ export async function executeBackupJob(
   const startTime = Date.now()
   const logStream = createLogPublisher(params.historyId, userId)
 
-  logger.info({
-    sourcePath: params.sourcePath,
-    destinationId: params.destinationId,
-    namePattern: params.namePattern,
-  }, 'Starting backup job')
+  logger.info(
+    {
+      sourcePath: params.sourcePath,
+      destinationId: params.destinationId,
+      namePattern: params.namePattern,
+    },
+    'Starting backup job'
+  )
 
   logStream.info('Starting backup job', {
     sourcePath: params.sourcePath,
@@ -65,7 +64,9 @@ export async function executeBackupJob(
     })
 
     // Use absolute path if NAS_MOUNT_PATH is empty (local development)
-    const fullPath = NAS_MOUNT_PATH ? path.join(NAS_MOUNT_PATH, params.sourcePath) : params.sourcePath
+    const fullPath = NAS_MOUNT_PATH
+      ? path.join(NAS_MOUNT_PATH, params.sourcePath)
+      : params.sourcePath
     const fileList = await scanDirectoryWithDetails(fullPath, logStream)
     result.filesScanned = fileList.length
 
@@ -98,11 +99,7 @@ export async function executeBackupJob(
     }
 
     // Decrypt credentials
-    const decryptedData = decrypt(
-      credential.encryptedData,
-      credential.iv,
-      credential.authTag
-    )
+    const decryptedData = decrypt(credential.encryptedData, credential.iv, credential.authTag)
     const credentialData = JSON.parse(decryptedData)
     logStream.info('Credentials decrypted successfully')
 
@@ -127,7 +124,10 @@ export async function executeBackupJob(
     const backupName = generateBackupName(params.namePattern)
     logStream.info(`Creating backup folder: ${backupName}`)
     const backupFolder = await adapter.createFolder(destination.remoteId, backupName)
-    logger.info({ folderId: backupFolder.id, folderName: backupFolder.name }, 'Backup folder created')
+    logger.info(
+      { folderId: backupFolder.id, folderName: backupFolder.name },
+      'Backup folder created'
+    )
     logStream.info(`Backup folder created: ${backupFolder.name}`)
 
     // Upload files in parallel with concurrency limit
@@ -137,11 +137,18 @@ export async function executeBackupJob(
     let lastProgressTime = 0
 
     const uploadLimit = pLimit(CONCURRENT_UPLOADS)
-    logStream.info(`Starting parallel upload of ${fileList.length} files (${CONCURRENT_UPLOADS} concurrent)...`)
+    logStream.info(
+      `Starting parallel upload of ${fileList.length} files (${CONCURRENT_UPLOADS} concurrent)...`
+    )
 
     // Pre-build folder structure to avoid redundant API calls (if adapter supports it)
     if (adapter.preBuildFolderStructure) {
-      await adapter.preBuildFolderStructure(destination.remoteId, backupFolder.id, backupFolder.name, fileList.map(f => path.relative(fullPath, f.path)))
+      await adapter.preBuildFolderStructure(
+        destination.remoteId,
+        backupFolder.id,
+        backupFolder.name,
+        fileList.map((f) => path.relative(fullPath, f.path))
+      )
     }
 
     // Throttled progress reporter
@@ -192,7 +199,10 @@ export async function executeBackupJob(
 
           uploadedFiles++
           totalBytesUploaded += fileInfo.size
-          logger.info({ file: relativePath, uploadedFiles, totalFiles: fileList.length }, 'File uploaded')
+          logger.info(
+            { file: relativePath, uploadedFiles, totalFiles: fileList.length },
+            'File uploaded'
+          )
 
           // Log every 10 files or at completion to avoid log spam
           if (uploadedFiles % 10 === 0 || uploadedFiles === fileList.length) {
@@ -200,11 +210,20 @@ export async function executeBackupJob(
           }
 
           return { success: true, path: relativePath }
-        } catch (error: any) {
+        } catch (error: unknown) {
           failedFiles++
-          logger.error({ file: fileInfo.path, error: error.message }, 'Failed to upload file')
-          logStream.error(`Error: Failed to upload: ${relativePath} - ${error.message}`)
-          return { success: false, path: relativePath, error: error.message }
+          logger.error(
+            { file: fileInfo.path, error: error instanceof Error ? error.message : String(error) },
+            'Failed to upload file'
+          )
+          logStream.error(
+            `Error: Failed to upload: ${relativePath} - ${error instanceof Error ? error.message : String(error)}`
+          )
+          return {
+            success: false,
+            path: relativePath,
+            error: error instanceof Error ? error.message : String(error),
+          }
         }
       })
     )
@@ -234,23 +253,31 @@ export async function executeBackupJob(
 
     await applyRetentionPolicy(adapter, destination.remoteId, params.retentionPolicy, logStream)
 
-    logger.info({ backupName, remotePath: backupFolder.path, uploadedFiles, failedFiles: result.filesFailed }, 'Backup completed successfully')
-    logStream.info(`Backup completed! ${uploadedFiles} files uploaded, ${result.filesFailed} failed`, {
-      uploadedFiles,
-      failedFiles: result.filesFailed,
-      totalBytes: formatBytes(totalBytesUploaded),
-      duration: `${Math.round((Date.now() - startTime) / 1000)}s`,
-    })
+    logger.info(
+      { backupName, remotePath: backupFolder.path, uploadedFiles, failedFiles: result.filesFailed },
+      'Backup completed successfully'
+    )
+    logStream.info(
+      `Backup completed! ${uploadedFiles} files uploaded, ${result.filesFailed} failed`,
+      {
+        uploadedFiles,
+        failedFiles: result.filesFailed,
+        totalBytes: formatBytes(totalBytesUploaded),
+        duration: `${Math.round((Date.now() - startTime) / 1000)}s`,
+      }
+    )
 
     result.success = true
     result.duration = Date.now() - startTime
 
     return result
-  } catch (error: any) {
-    logger.error({ error: error.message, stack: error.stack }, 'Backup job failed')
-    logStream.error(`Backup failed: ${error.message}`)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+    logger.error({ error: errorMessage, stack: errorStack }, 'Backup job failed')
+    logStream.error(`Backup failed: ${errorMessage}`)
     result.duration = Date.now() - startTime
-    result.error = error.message
+    result.error = errorMessage
     return result
   }
 }
@@ -272,23 +299,24 @@ interface FileInfo {
 
 // OS-specific files to ignore (not hidden files, just OS junk)
 const OS_JUNK_FILES = new Set([
-  '.DS_Store',        // macOS
-  '._.DS_Store',      // macOS extended attributes
-  'Thumbs.db',        // Windows
-  'thumbs.db',        // Windows (lowercase)
-  'desktop.ini',      // Windows
-  'Desktop.ini',      // Windows (capitalized)
-  '.Spotlight-V100',  // macOS Spotlight
-  '.Trashes',         // macOS Trash
-  '.TemporaryItems',  // macOS
-  '.fseventsd',       // macOS FSEvents
+  '.DS_Store', // macOS
+  '._.DS_Store', // macOS extended attributes
+  'Thumbs.db', // Windows
+  'thumbs.db', // Windows (lowercase)
+  'desktop.ini', // Windows
+  'Desktop.ini', // Windows (capitalized)
+  '.Spotlight-V100', // macOS Spotlight
+  '.Trashes', // macOS Trash
+  '.TemporaryItems', // macOS
+  '.fseventsd', // macOS FSEvents
 ])
 
 const OS_JUNK_DIRECTORIES = new Set([
-  '$RECYCLE.BIN',              // Windows Recycle Bin
+  '$RECYCLE.BIN', // Windows Recycle Bin
   'System Volume Information', // Windows System
 ])
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function scanDirectoryWithDetails(dirPath: string, logStream: any): Promise<FileInfo[]> {
   const files: FileInfo[] = []
   let skippedCount = 0
@@ -323,13 +351,19 @@ async function scanDirectoryWithDetails(dirPath: string, logStream: any): Promis
               path: fullPath,
               size: stats.size,
             })
-          } catch (error: any) {
-            logger.error({ path: fullPath, error: error.message }, 'Error getting file stats')
+          } catch (error: unknown) {
+            logger.error(
+              { path: fullPath, error: error instanceof Error ? error.message : String(error) },
+              'Error getting file stats'
+            )
           }
         }
       }
-    } catch (error: any) {
-      logger.error({ path: currentPath, error: error.message }, 'Error scanning directory')
+    } catch (error: unknown) {
+      logger.error(
+        { path: currentPath, error: error instanceof Error ? error.message : String(error) },
+        'Error scanning directory'
+      )
     }
   }
 
@@ -374,6 +408,7 @@ async function applyRetentionPolicy(
   adapter: StorageAdapter,
   destinationId: string,
   policy: { type: 'VERSION_COUNT' | 'DAYS' | 'HYBRID'; count?: number; days?: number },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logStream: any
 ): Promise<void> {
   try {
@@ -398,7 +433,9 @@ async function applyRetentionPolicy(
       // Keep only the N most recent backups
       if (backups.length > policy.count) {
         toDelete.push(...backups.slice(policy.count).map((b) => b.path))
-        logStream.info(`Keeping ${policy.count} most recent backups, removing ${toDelete.length} old backups`)
+        logStream.info(
+          `Keeping ${policy.count} most recent backups, removing ${toDelete.length} old backups`
+        )
       }
     } else if (policy.type === 'DAYS' && policy.days) {
       // Keep backups from the last N days
@@ -410,7 +447,9 @@ async function applyRetentionPolicy(
           toDelete.push(backup.path)
         }
       }
-      logStream.info(`Keeping backups from last ${policy.days} days, removing ${toDelete.length} old backups`)
+      logStream.info(
+        `Keeping backups from last ${policy.days} days, removing ${toDelete.length} old backups`
+      )
     } else if (policy.type === 'HYBRID' && policy.count && policy.days) {
       // Keep N versions AND anything newer than M days (whichever is more permissive)
       const cutoffDate = new Date()
@@ -426,7 +465,9 @@ async function applyRetentionPolicy(
           toDelete.push(backup.path)
         }
       }
-      logStream.info(`Hybrid policy: keeping ${policy.count} versions OR ${policy.days} days, removing ${toDelete.length} old backups`)
+      logStream.info(
+        `Hybrid policy: keeping ${policy.count} versions OR ${policy.days} days, removing ${toDelete.length} old backups`
+      )
     }
 
     // Delete old backups
@@ -438,8 +479,11 @@ async function applyRetentionPolicy(
           await adapter.deleteFolder(destinationId, backupPath)
           logger.info({ backupPath }, 'Deleted old backup')
           logStream.info(`Deleted old backup: ${backupPath}`)
-        } catch (error: any) {
-          logger.error({ backupPath, error: error.message }, 'Failed to delete old backup')
+        } catch (error: unknown) {
+          logger.error(
+            { backupPath, error: error instanceof Error ? error.message : String(error) },
+            'Failed to delete old backup'
+          )
           logStream.error(`Error: Failed to delete backup: ${backupPath}`)
         }
       }
@@ -447,9 +491,14 @@ async function applyRetentionPolicy(
       logger.info('No backups to delete')
       logStream.info('No old backups to delete')
     }
-  } catch (error: any) {
-    logger.error({ error: error.message }, 'Failed to apply retention policy')
-    logStream.error(`Error: Retention policy error: ${error.message}`)
+  } catch (error: unknown) {
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error) },
+      'Failed to apply retention policy'
+    )
+    logStream.error(
+      `Error: Retention policy error: ${error instanceof Error ? error.message : String(error)}`
+    )
     // Don't throw - retention failure shouldn't fail the entire backup
   }
 }

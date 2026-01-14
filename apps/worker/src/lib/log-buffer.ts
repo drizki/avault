@@ -7,6 +7,7 @@ interface LogEntry {
   timestamp: Date
   level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR'
   message: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>
 }
 
@@ -75,9 +76,9 @@ export class LogBuffer {
       })
 
       logger.debug({ count: toFlush.length }, 'Flushed logs to database')
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(
-        { error: error.message, count: toFlush.length },
+        { error: error instanceof Error ? error.message : String(error), count: toFlush.length },
         'Failed to flush logs to database'
       )
 
@@ -85,10 +86,7 @@ export class LogBuffer {
       if (this.buffer.length < this.maxBufferSize * 2) {
         this.buffer.unshift(...toFlush)
       } else {
-        logger.warn(
-          { droppedLogs: toFlush.length },
-          'Buffer overflow - dropping logs'
-        )
+        logger.warn({ droppedLogs: toFlush.length }, 'Buffer overflow - dropping logs')
       }
     } finally {
       this.isFlushing = false
@@ -101,7 +99,10 @@ export class LogBuffer {
   private startFlushTimer(): void {
     this.flushInterval = setInterval(() => {
       this.flush().catch((err) => {
-        logger.error({ error: err.message }, 'Error in log buffer flush timer')
+        logger.error(
+          { error: err instanceof Error ? err.message : String(err) },
+          'Error in log buffer flush timer'
+        )
       })
     }, this.flushIntervalMs)
   }

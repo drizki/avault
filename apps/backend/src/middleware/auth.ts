@@ -6,10 +6,7 @@ import type { Env } from '../index'
  * Require authentication for a route
  * Returns 401 if no valid token is present
  */
-export async function requireAuth(
-  c: Context<Env>,
-  next: Next
-): Promise<Response | void> {
+export async function requireAuth(c: Context<Env>, next: Next): Promise<Response | void> {
   const cookieHeader = c.req.header('cookie')
   const token = getTokenFromCookie(cookieHeader || null)
 
@@ -34,17 +31,11 @@ export async function requireAuth(
  * Require admin role for a route
  * Must be used after requireAuth middleware
  */
-export async function requireAdmin(
-  c: Context<Env>,
-  next: Next
-): Promise<Response | void> {
+export async function requireAdmin(c: Context<Env>, next: Next): Promise<Response | void> {
   const userRole = c.get('userRole')
 
   if (userRole !== 'ADMIN') {
-    return c.json(
-      { success: false, error: 'Admin access required' },
-      403
-    )
+    return c.json({ success: false, error: 'Admin access required' }, 403)
   }
 
   await next()
@@ -53,10 +44,7 @@ export async function requireAdmin(
 /**
  * Optional authentication - extracts user if present, but doesn't block
  */
-export async function optionalAuth(
-  c: Context<Env>,
-  next: Next
-): Promise<void> {
+export async function optionalAuth(c: Context<Env>, next: Next): Promise<void> {
   const cookieHeader = c.req.header('cookie')
   const token = getTokenFromCookie(cookieHeader || null)
 

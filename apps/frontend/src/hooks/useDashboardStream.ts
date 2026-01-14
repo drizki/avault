@@ -77,6 +77,7 @@ export interface Alert {
   title: string
   message: string
   timestamp: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>
 }
 
@@ -92,8 +93,14 @@ export interface ChartDataPoint {
 type DashboardEvent =
   | { type: 'connected' }
   | { type: 'stats:update'; payload: DashboardStats }
-  | { type: 'job:started'; payload: { historyId: string; jobId: string; jobName: string; startedAt: string } }
-  | { type: 'job:progress'; payload: ActiveJob['progress'] & { historyId: string; jobId: string; jobName: string } }
+  | {
+      type: 'job:started'
+      payload: { historyId: string; jobId: string; jobName: string; startedAt: string }
+    }
+  | {
+      type: 'job:progress'
+      payload: ActiveJob['progress'] & { historyId: string; jobId: string; jobName: string }
+    }
   | { type: 'job:completed'; payload: { historyId: string; jobId: string; status: string } }
   | { type: 'queue:update'; payload: DashboardStats['queue'] }
   | { type: 'health:update'; payload: { worker: string; timestamp: string } }
@@ -147,7 +154,8 @@ export function useDashboardStream(): UseDashboardStreamReturn {
       eventSourceRef.current = eventSource
 
       eventSource.onopen = () => {
-        console.log('[Dashboard SSE] Connected')
+        // eslint-disable-next-line no-console
+        console.info('[Dashboard SSE] Connected')
         setIsConnected(true)
       }
 
@@ -157,7 +165,8 @@ export function useDashboardStream(): UseDashboardStreamReturn {
 
           switch (data.type) {
             case 'connected':
-              console.log('[Dashboard SSE] Server confirmed connection')
+              // eslint-disable-next-line no-console
+              console.info('[Dashboard SSE] Server confirmed connection')
               break
 
             case 'job:started':
@@ -189,6 +198,7 @@ export function useDashboardStream(): UseDashboardStreamReturn {
                 if (existing) {
                   next.set(data.payload.historyId, {
                     ...existing,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     status: (data.payload as any).status || existing.status,
                     progress: {
                       filesScanned: data.payload.filesScanned ?? existing.progress.filesScanned,
@@ -205,6 +215,7 @@ export function useDashboardStream(): UseDashboardStreamReturn {
                     historyId: data.payload.historyId,
                     jobId: data.payload.jobId,
                     jobName: data.payload.jobName,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     status: (data.payload as any).status || 'RUNNING',
                     startedAt: new Date().toISOString(),
                     progress: {
@@ -253,7 +264,8 @@ export function useDashboardStream(): UseDashboardStreamReturn {
 
         // Attempt to reconnect after 5 seconds
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log('[Dashboard SSE] Attempting to reconnect...')
+          // eslint-disable-next-line no-console
+          console.info('[Dashboard SSE] Attempting to reconnect...')
           connect()
         }, 5000)
       }

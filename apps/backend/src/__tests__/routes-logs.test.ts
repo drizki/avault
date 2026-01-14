@@ -72,7 +72,7 @@ describe('logs routes', () => {
       const res = await app.request('/api/logs')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Authentication required')
     })
 
@@ -82,7 +82,7 @@ describe('logs routes', () => {
       const res = await app.request('/api/logs?token=invalid-token')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Invalid or expired token')
     })
   })
@@ -92,7 +92,7 @@ describe('logs routes', () => {
       const res = await app.request('/api/logs/history-123')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Authentication required')
     })
 
@@ -102,7 +102,7 @@ describe('logs routes', () => {
       const res = await app.request('/api/logs/history-123?token=invalid')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Invalid or expired token')
     })
 
@@ -113,7 +113,7 @@ describe('logs routes', () => {
       const res = await app.request('/api/logs/nonexistent?token=valid-token')
 
       expect(res.status).toBe(404)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('History entry not found')
     })
   })
@@ -125,7 +125,7 @@ describe('logs routes', () => {
       const res = await app.request('/api/logs', { method: 'DELETE' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.deletedCount).toBe(50)
     })
@@ -146,7 +146,7 @@ describe('logs routes', () => {
       const res = await app.request('/api/logs', { method: 'DELETE' })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to delete logs')
     })
   })

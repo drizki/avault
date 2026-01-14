@@ -32,11 +32,9 @@ export async function acquireJobLock(
 
     logger.debug({ jobId }, 'Job already locked by another instance')
     return false
-  } catch (error: any) {
-    logger.error(
-      { error: error.message, jobId },
-      'Error acquiring job lock'
-    )
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message, jobId }, 'Error acquiring job lock')
     return false
   }
 }
@@ -47,19 +45,14 @@ export async function acquireJobLock(
  * @param redis - Redis client instance
  * @param jobId - Unique job identifier
  */
-export async function releaseJobLock(
-  redis: Redis,
-  jobId: string
-): Promise<void> {
+export async function releaseJobLock(redis: Redis, jobId: string): Promise<void> {
   try {
     const lockKey = `${LOCK_PREFIX}${jobId}`
     await redis.del(lockKey)
     logger.debug({ jobId }, 'Job lock released')
-  } catch (error: any) {
-    logger.error(
-      { error: error.message, jobId },
-      'Error releasing job lock'
-    )
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message, jobId }, 'Error releasing job lock')
   }
 }
 
@@ -70,19 +63,14 @@ export async function releaseJobLock(
  * @param jobId - Unique job identifier
  * @returns true if locked, false otherwise
  */
-export async function isJobLocked(
-  redis: Redis,
-  jobId: string
-): Promise<boolean> {
+export async function isJobLocked(redis: Redis, jobId: string): Promise<boolean> {
   try {
     const lockKey = `${LOCK_PREFIX}${jobId}`
     const exists = await redis.exists(lockKey)
     return exists === 1
-  } catch (error: any) {
-    logger.error(
-      { error: error.message, jobId },
-      'Error checking job lock'
-    )
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error({ error: message, jobId }, 'Error checking job lock')
     return false
   }
 }

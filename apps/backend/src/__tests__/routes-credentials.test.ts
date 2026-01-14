@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Hono } from 'hono'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ApiResponse = { success: boolean; data?: any; error?: string; details?: string; message?: string }
+type ApiResponse = {
+  success: boolean
+  data?: any
+  error?: string
+  details?: string
+  message?: string
+}
 
 const mocks = vi.hoisted(() => ({
   credentialFindMany: vi.fn(),
@@ -84,7 +90,7 @@ describe('credentials routes', () => {
       const res = await app.request('/api/credentials')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toHaveLength(2)
     })
@@ -115,7 +121,7 @@ describe('credentials routes', () => {
       const res = await app.request('/api/credentials/cred-1')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.id).toBe('cred-1')
     })
@@ -126,7 +132,7 @@ describe('credentials routes', () => {
       const res = await app.request('/api/credentials/nonexistent')
 
       expect(res.status).toBe(404)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Credential not found')
     })
   })
@@ -139,7 +145,7 @@ describe('credentials routes', () => {
       const res = await app.request('/api/credentials/cred-1', { method: 'DELETE' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.message).toBe('Credential deleted successfully')
     })
@@ -173,7 +179,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.authUrl).toBe('https://accounts.google.com/oauth')
     })
@@ -202,7 +208,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to initiate OAuth flow')
       expect(mocks.loggerError).toHaveBeenCalled()
     })
@@ -237,7 +243,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(201)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.provider).toBe('s3')
     })
@@ -254,7 +260,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('Invalid provider')
     })
 
@@ -270,7 +276,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('secret access key')
     })
 
@@ -286,7 +292,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('account ID')
     })
 
@@ -379,7 +385,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to create credential')
       expect(body.details).toBe('Database error')
     })
@@ -417,7 +423,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(201)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
     })
 
@@ -457,7 +463,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('Invalid provider')
     })
 
@@ -472,7 +478,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('Invalid service account JSON')
     })
 
@@ -487,7 +493,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('Invalid service account JSON structure')
     })
 
@@ -510,7 +516,7 @@ describe('credentials routes', () => {
       })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to create credential')
       expect(body.details).toBe('Database error')
     })

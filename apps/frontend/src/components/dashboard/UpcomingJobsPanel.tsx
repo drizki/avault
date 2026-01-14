@@ -140,7 +140,10 @@ export function UpcomingJobsPanel() {
               const countdown = countdowns.get(job.id) ?? job.nextRunIn
 
               return (
-                <div key={job.id} className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors group">
+                <div
+                  key={job.id}
+                  className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors group"
+                >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="font-medium text-sm truncate">{job.name}</span>

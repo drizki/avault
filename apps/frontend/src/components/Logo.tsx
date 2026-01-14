@@ -28,20 +28,8 @@ export function Logo({ variant = 'full', size = 'md', className }: LogoProps) {
   const config = sizeConfig[size]
 
   if (variant === 'icon') {
-    return (
-      <img
-        src="/favicon.svg"
-        alt="Avault"
-        className={cn(config.icon, className)}
-      />
-    )
+    return <img src="/favicon.svg" alt="Avault" className={cn(config.icon, className)} />
   }
 
-  return (
-    <img
-      src="/logo.svg"
-      alt="Avault"
-      className={cn(config.full, className)}
-    />
-  )
+  return <img src="/logo.svg" alt="Avault" className={cn(config.full, className)} />
 }

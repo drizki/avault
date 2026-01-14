@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -134,10 +135,7 @@ describe('job-lock', () => {
 
       await releaseJobLock(mockRedis as any, 'job-456')
 
-      expect(mocks.loggerDebug).toHaveBeenCalledWith(
-        { jobId: 'job-456' },
-        'Job lock released'
-      )
+      expect(mocks.loggerDebug).toHaveBeenCalledWith({ jobId: 'job-456' }, 'Job lock released')
     })
 
     it('handles errors gracefully', async () => {

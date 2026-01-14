@@ -144,10 +144,38 @@ Required variables (see `.env.example`):
 
 ## Git Workflow
 
-- Branch from `develop` for features
+### Branch Strategy
+
+- **Never commit directly to `main`** - always use feature/fix branches
+- Branch naming: `feat/description`, `fix/description`, `chore/description`
+- Create PR to `main` for review before merging
+
+### Before Committing
+
+**ALWAYS run these checks before committing:**
+
+```bash
+pnpm lint          # Must pass with no errors
+pnpm test          # Must pass all tests
+pnpm build         # Must build successfully
+```
+
+If any check fails, fix the issues before committing.
+
+### Commit Guidelines
+
 - Use conventional commits: `feat:`, `fix:`, `chore:`, `docs:`
-- Create PR to `develop`, merge to `main` for releases
+- Keep commits focused and atomic
 - Tag releases with semver: `v1.0.0`
+
+### Pull Request Guidelines
+
+- **PR Title**: Use shortened conventional commit message as title
+  - Example: `fix: enforce strict TypeScript and resolve all build/lint issues`
+  - Format: `<type>: <short description>`
+- **PR Body**: Include detailed summary with sections explaining changes
+- Include test plan and verification results
+- Reference any related issues
 
 ## Security Considerations
 

@@ -35,8 +35,16 @@ interface DataTableProps<T> {
 
 type SortDirection = 'asc' | 'desc' | null
 
-function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((acc, part) => acc?.[part], obj)
+function getNestedValue(obj: unknown, path: string): unknown {
+  return path
+    .split('.')
+    .reduce(
+      (acc: unknown, part) =>
+        acc && typeof acc === 'object' && part in acc
+          ? (acc as Record<string, unknown>)[part]
+          : undefined,
+      obj
+    )
 }
 
 export function DataTable<T extends { id: string }>({
@@ -85,8 +93,8 @@ export function DataTable<T extends { id: string }>({
       const bVal = getNestedValue(b, sortKey)
 
       if (aVal === bVal) return 0
-      if (aVal == null) return 1
-      if (bVal == null) return -1
+      if (aVal === null || aVal === undefined) return 1
+      if (bVal === null || bVal === undefined) return -1
 
       const comparison = aVal < bVal ? -1 : 1
       return sortDirection === 'asc' ? comparison : -comparison
@@ -177,9 +185,7 @@ export function DataTable<T extends { id: string }>({
                   colSpan={columns.length + (actions ? 1 : 0)}
                   className="h-32 text-center"
                 >
-                  {emptyState || (
-                    <span className="text-muted-foreground">No results found</span>
-                  )}
+                  {emptyState || <span className="text-muted-foreground">No results found</span>}
                 </TableCell>
               </TableRow>
             ) : (
@@ -196,13 +202,11 @@ export function DataTable<T extends { id: string }>({
                     <TableCell key={column.key} className={column.className}>
                       {column.render
                         ? column.render(item)
-                        : getNestedValue(item, column.key)}
+                        : (getNestedValue(item, column.key) as React.ReactNode)}
                     </TableCell>
                   ))}
                   {actions && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      {actions(item)}
-                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>{actions(item)}</TableCell>
                   )}
                 </TableRow>
               ))

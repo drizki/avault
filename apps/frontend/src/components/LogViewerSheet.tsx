@@ -22,6 +22,7 @@ interface LogEvent {
   message: string
   jobId?: string
   historyId?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>
   _historical?: boolean
 }
@@ -190,16 +191,25 @@ export function LogViewerSheet({ open, onOpenChange, historyId, jobName }: LogVi
           <SheetDescription className="flex items-center gap-2">
             {jobName && <span className="font-medium">{jobName}</span>}
             {isLoadingHistorical ? (
-              <Badge variant="outline" className="bg-status-info/10 text-status-info border-status-info/20">
+              <Badge
+                variant="outline"
+                className="bg-status-info/10 text-status-info border-status-info/20"
+              >
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                 Loading...
               </Badge>
             ) : isConnected ? (
-              <Badge variant="outline" className="bg-status-success/10 text-status-success border-status-success/20">
+              <Badge
+                variant="outline"
+                className="bg-status-success/10 text-status-success border-status-success/20"
+              >
                 Connected
               </Badge>
             ) : (
-              <Badge variant="outline" className="bg-status-error/10 text-status-error border-status-error/20">
+              <Badge
+                variant="outline"
+                className="bg-status-error/10 text-status-error border-status-error/20"
+              >
                 Disconnected
               </Badge>
             )}
@@ -220,9 +230,7 @@ export function LogViewerSheet({ open, onOpenChange, historyId, jobName }: LogVi
             </SelectContent>
           </Select>
           {historicalCount > 0 && (
-            <span className="text-xs text-muted-foreground">
-              {historicalCount} logs loaded
-            </span>
+            <span className="text-xs text-muted-foreground">{historicalCount} logs loaded</span>
           )}
         </div>
 
@@ -234,18 +242,13 @@ export function LogViewerSheet({ open, onOpenChange, historyId, jobName }: LogVi
 
         <div className="flex-1 bg-black p-3 overflow-y-auto font-mono text-xs border border-border min-h-0">
           {logs.length === 0 && !isLoadingHistorical ? (
-            <div className="text-muted-foreground text-center py-8">
-              Waiting for logs...
-            </div>
+            <div className="text-muted-foreground text-center py-8">Waiting for logs...</div>
           ) : (
             <div className="space-y-0.5">
               {logs
                 .filter((log) => log.timestamp && log.level && log.message)
                 .map((log, index) => (
-                  <div
-                    key={index}
-                    className={`flex gap-2 ${log._historical ? 'opacity-80' : ''}`}
-                  >
+                  <div key={index} className={`flex gap-2 ${log._historical ? 'opacity-80' : ''}`}>
                     <span className="text-muted-foreground shrink-0">
                       {formatTimestamp(log.timestamp)}
                     </span>

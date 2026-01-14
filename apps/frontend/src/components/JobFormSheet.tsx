@@ -53,11 +53,25 @@ interface CreatedJob {
   name: string
 }
 
+interface EditJob {
+  id: string
+  name: string
+  sourcePath: string
+  destinationId: string
+  credentialId: string
+  schedule: string
+  retentionType: 'VERSION_COUNT' | 'DAYS' | 'HYBRID'
+  retentionCount?: number
+  retentionDays?: number
+  namePattern?: string
+  enabled: boolean
+}
+
 interface JobFormSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
-  editJob?: any
+  editJob?: EditJob | null
 }
 
 const SCHEDULE_PRESETS = [
@@ -218,8 +232,12 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
   // Filter destinations by selected credential
   const filteredDestinations = formData.credentialId
     ? destinations.filter((d) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dest = d as any
-        return dest.credentialId === formData.credentialId || dest.credential?.id === formData.credentialId
+        return (
+          dest.credentialId === formData.credentialId ||
+          dest.credential?.id === formData.credentialId
+        )
       })
     : []
 
@@ -230,7 +248,8 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
           <SheetHeader>
             <SheetTitle>{editJob ? 'Edit Backup Job' : 'Create Backup Job'}</SheetTitle>
             <SheetDescription>
-              Configure your backup job settings. The job will run automatically based on the schedule.
+              Configure your backup job settings. The job will run automatically based on the
+              schedule.
             </SheetDescription>
           </SheetHeader>
 
@@ -261,9 +280,7 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
                   onChange={(path) => setFormData({ ...formData, sourcePath: path })}
                   placeholder="Select folder to backup..."
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Folder on your NAS to backup
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">Folder on your NAS to backup</p>
               </div>
 
               {/* Storage Credential - Must select first */}
@@ -271,11 +288,13 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
                 <Label htmlFor="credential">Storage Credential *</Label>
                 <Select
                   value={formData.credentialId}
-                  onValueChange={(value) => setFormData({
-                    ...formData,
-                    credentialId: value,
-                    destinationId: '' // Reset destination when credential changes
-                  })}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      credentialId: value,
+                      destinationId: '', // Reset destination when credential changes
+                    })
+                  }
                   required
                 >
                   <SelectTrigger>
@@ -304,7 +323,11 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
                   disabled={!formData.credentialId}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={formData.credentialId ? "Select destination" : "Select credential first"} />
+                    <SelectValue
+                      placeholder={
+                        formData.credentialId ? 'Select destination' : 'Select credential first'
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredDestinations.length > 0 ? (
@@ -365,7 +388,12 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
                   <Label htmlFor="retentionType">Retention Policy *</Label>
                   <Select
                     value={formData.retentionType}
-                    onValueChange={(value: any) => setFormData({ ...formData, retentionType: value })}
+                    onValueChange={(value: string) =>
+                      setFormData({
+                        ...formData,
+                        retentionType: value as 'VERSION_COUNT' | 'DAYS' | 'HYBRID',
+                      })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -424,7 +452,8 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
                   placeholder="backup-{date}-{hash}"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Available: {'{date}'}, {'{datetime}'}, {'{hash}'}, {'{year}'}, {'{month}'}, {'{day}'}
+                  Available: {'{date}'}, {'{datetime}'}, {'{hash}'}, {'{year}'}, {'{month}'},{' '}
+                  {'{day}'}
                 </p>
               </div>
 

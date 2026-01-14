@@ -101,14 +101,19 @@ describe('jobs routes', () => {
   describe('GET /api/jobs', () => {
     it('returns list of user jobs', async () => {
       const mockJobs = [
-        { id: 'job-1', name: 'Daily Backup', destination: { id: 'dest-1' }, credential: { id: 'cred-1' } },
+        {
+          id: 'job-1',
+          name: 'Daily Backup',
+          destination: { id: 'dest-1' },
+          credential: { id: 'cred-1' },
+        },
       ]
       mocks.jobFindMany.mockResolvedValue(mockJobs)
 
       const res = await app.request('/api/jobs')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toHaveLength(1)
     })
@@ -133,7 +138,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/queue/active')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
     })
 
@@ -153,7 +158,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/queue/cleanup', { method: 'POST' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.cleanedCount).toBe(2)
     })
 
@@ -171,7 +176,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/queue/cleanup', { method: 'POST' })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to cleanup stuck jobs')
     })
   })
@@ -190,7 +195,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/history/hist-1/cancel', { method: 'POST' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.message).toBe('Job cancelled')
     })
 
@@ -212,7 +217,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/history/hist-1/cancel', { method: 'POST' })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('success')
     })
 
@@ -227,7 +232,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/history/hist-1/cancel', { method: 'POST' })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to cancel job')
     })
 
@@ -246,7 +251,7 @@ describe('jobs routes', () => {
 
       // Should still succeed despite queue job cancellation warning
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.message).toBe('Job cancelled')
       expect(mocks.loggerWarn).toHaveBeenCalled()
     })
@@ -281,7 +286,7 @@ describe('jobs routes', () => {
       })
 
       expect(res.status).toBe(201)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
     })
 
@@ -307,7 +312,7 @@ describe('jobs routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to create backup job')
     })
   })
@@ -325,7 +330,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/job-1')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.id).toBe('job-1')
     })
 
@@ -359,7 +364,7 @@ describe('jobs routes', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.name).toBe('Updated Backup')
     })
 
@@ -415,7 +420,7 @@ describe('jobs routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to update job')
     })
   })
@@ -428,7 +433,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/job-1', { method: 'DELETE' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.message).toBe('Job deleted successfully')
     })
 
@@ -447,7 +452,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/job-1', { method: 'DELETE' })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to delete job')
     })
   })
@@ -472,7 +477,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/job-1/run', { method: 'POST' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.historyId).toBe('hist-new')
     })
 
@@ -511,7 +516,7 @@ describe('jobs routes', () => {
       const res = await app.request('/api/jobs/job-1/history')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data).toHaveLength(2)
     })
 

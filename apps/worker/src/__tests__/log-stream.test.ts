@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -22,7 +23,14 @@ vi.mock('@avault/shared', async (importOriginal) => {
   }
 })
 
-import { publishLog, createLogPublisher, publishSystemLog, workerSystemLog, initializeLogBuffer, shutdownLogBuffer } from '../lib/log-stream'
+import {
+  publishLog,
+  createLogPublisher,
+  publishSystemLog,
+  workerSystemLog,
+  initializeLogBuffer,
+  shutdownLogBuffer,
+} from '../lib/log-stream'
 
 describe('worker log-stream', () => {
   beforeEach(async () => {
@@ -60,10 +68,7 @@ describe('worker log-stream', () => {
 
       await publishLog(event)
 
-      expect(mocks.publish).toHaveBeenCalledWith(
-        'logs:user:user-789',
-        expect.any(String)
-      )
+      expect(mocks.publish).toHaveBeenCalledWith('logs:user:user-789', expect.any(String))
     })
 
     it('handles errors gracefully', async () => {
@@ -170,10 +175,7 @@ describe('worker log-stream', () => {
     it('includes metadata', async () => {
       await publishSystemLog('error', 'System error', { code: 'E001' })
 
-      expect(mocks.publish).toHaveBeenCalledWith(
-        'logs:system',
-        expect.stringContaining('E001')
-      )
+      expect(mocks.publish).toHaveBeenCalledWith('logs:system', expect.stringContaining('E001'))
     })
 
     it('handles errors gracefully', async () => {
@@ -273,7 +275,7 @@ describe('worker log-stream', () => {
       expect(mocks.publish).toHaveBeenCalled()
 
       // Give time for buffer to potentially flush
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise((resolve) => setTimeout(resolve, 50))
     })
   })
 })

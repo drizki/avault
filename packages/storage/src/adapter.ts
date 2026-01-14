@@ -48,7 +48,11 @@ export abstract class StorageAdapter implements IStorageAdapter {
    * @param parentPath Optional parent folder path/ID
    * @returns Created folder info
    */
-  abstract createFolder(destinationId: string, name: string, parentPath?: string): Promise<StorageFolder>
+  abstract createFolder(
+    destinationId: string,
+    name: string,
+    parentPath?: string
+  ): Promise<StorageFolder>
 
   /**
    * Rename a folder.

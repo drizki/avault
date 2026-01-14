@@ -79,7 +79,7 @@ describe('settings routes', () => {
       const res = await app.request('/api/settings')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toEqual(mockSettings)
     })
@@ -90,7 +90,7 @@ describe('settings routes', () => {
       const res = await app.request('/api/settings')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('Failed to fetch settings')
     })
@@ -103,7 +103,7 @@ describe('settings routes', () => {
       const res = await app.request('/api/settings/backup_retention_days')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toEqual({
         key: 'backup_retention_days',
@@ -117,7 +117,7 @@ describe('settings routes', () => {
       const res = await app.request('/api/settings/nonexistent_key')
 
       expect(res.status).toBe(404)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('Setting not found')
     })
@@ -128,7 +128,7 @@ describe('settings routes', () => {
       const res = await app.request('/api/settings/some_key')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('Failed to fetch setting')
     })
@@ -145,7 +145,7 @@ describe('settings routes', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toEqual({
         key: 'backup_retention_days',
@@ -162,7 +162,7 @@ describe('settings routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('Value is required')
     })
@@ -177,7 +177,7 @@ describe('settings routes', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.value).toBe(false)
     })
 
@@ -192,7 +192,7 @@ describe('settings routes', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.value).toEqual(complexValue)
     })
 
@@ -206,7 +206,7 @@ describe('settings routes', () => {
       })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('Failed to update setting')
     })

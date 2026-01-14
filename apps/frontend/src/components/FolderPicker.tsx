@@ -17,6 +17,9 @@ interface FolderItem {
   id?: string
   name: string
   path: string
+  type?: 'directory' | 'file'
+  size?: number
+  modified?: Date
 }
 
 interface FolderPickerProps {
@@ -75,15 +78,15 @@ export function FolderPicker({
 
     try {
       if (type === 'nas') {
-        const currentPath = breadcrumbs.length > 0
-          ? breadcrumbs[breadcrumbs.length - 1].path
-          : '/'
-        const response = await api.get<{ items: FolderItem[] }>(`/nas/browse?path=${encodeURIComponent(currentPath)}`)
+        const currentPath = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].path : '/'
+        const response = await api.get<{ items: FolderItem[] }>(
+          `/nas/browse?path=${encodeURIComponent(currentPath)}`
+        )
         if (response.success && response.data) {
           // Filter only directories
           const dirs = response.data.items
-            .filter((item: any) => item.type === 'directory')
-            .map((item: any) => ({
+            .filter((item: FolderItem) => item.type === 'directory')
+            .map((item: FolderItem) => ({
               name: item.name,
               path: item.path,
             }))
@@ -100,9 +103,9 @@ export function FolderPicker({
           setFolders(response.data)
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch folders:', err)
-      setError(err.message || 'Failed to load folders')
+      setError(err instanceof Error ? err.message : String(err) || 'Failed to load folders')
     } finally {
       setLoading(false)
     }
@@ -111,7 +114,10 @@ export function FolderPicker({
   async function handleFolderClick(folder: FolderItem) {
     const newBreadcrumb: BreadcrumbItem = {
       name: folder.name,
-      path: type === 'nas' ? folder.path : `${breadcrumbs[breadcrumbs.length - 1]?.path || ''}/${folder.name}`,
+      path:
+        type === 'nas'
+          ? folder.path
+          : `${breadcrumbs[breadcrumbs.length - 1]?.path || ''}/${folder.name}`,
       folderId: folder.id,
     }
     setBreadcrumbs([...breadcrumbs, newBreadcrumb])
@@ -121,18 +127,20 @@ export function FolderPicker({
       // For NAS, we need to fetch with the new path
       setLoading(true)
       try {
-        const response = await api.get<{ items: FolderItem[] }>(`/nas/browse?path=${encodeURIComponent(folder.path)}`)
+        const response = await api.get<{ items: FolderItem[] }>(
+          `/nas/browse?path=${encodeURIComponent(folder.path)}`
+        )
         if (response.success && response.data) {
           const dirs = response.data.items
-            .filter((item: any) => item.type === 'directory')
-            .map((item: any) => ({
+            .filter((item: FolderItem) => item.type === 'directory')
+            .map((item: FolderItem) => ({
               name: item.name,
               path: item.path,
             }))
           setFolders(dirs)
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load folders')
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : String(err) || 'Failed to load folders')
       } finally {
         setLoading(false)
       }
@@ -150,19 +158,22 @@ export function FolderPicker({
     if (type === 'nas') {
       // Fetch folders for the NAS path
       setLoading(true)
-      api.get<{ items: FolderItem[] }>(`/nas/browse?path=${encodeURIComponent(targetBreadcrumb?.path || '/')}`)
-        .then(response => {
+      api
+        .get<{ items: FolderItem[] }>(
+          `/nas/browse?path=${encodeURIComponent(targetBreadcrumb?.path || '/')}`
+        )
+        .then((response) => {
           if (response.success && response.data) {
             const dirs = response.data.items
-              .filter((item: any) => item.type === 'directory')
-              .map((item: any) => ({
+              .filter((item: FolderItem) => item.type === 'directory')
+              .map((item: FolderItem) => ({
                 name: item.name,
                 path: item.path,
               }))
             setFolders(dirs)
           }
         })
-        .catch(err => setError(err.message))
+        .catch((err) => setError(err instanceof Error ? err.message : String(err)))
         .finally(() => setLoading(false))
     } else {
       fetchFolders(targetBreadcrumb?.folderId)
@@ -186,7 +197,7 @@ export function FolderPicker({
         setNewFolderName('')
         setShowCreateInput(false)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to create folder:', err)
     } finally {
       setCreating(false)
@@ -252,7 +263,9 @@ export function FolderPicker({
                   onClick={() => handleBreadcrumbClick(index)}
                   className={cn(
                     'hover:text-primary transition-colors px-1 py-0.5 rounded',
-                    index === breadcrumbs.length - 1 ? 'font-medium text-primary' : 'text-muted-foreground'
+                    index === breadcrumbs.length - 1
+                      ? 'font-medium text-primary'
+                      : 'text-muted-foreground'
                   )}
                 >
                   {crumb.name}
@@ -273,11 +286,7 @@ export function FolderPicker({
               <div className="flex flex-col items-center justify-center h-[200px] text-center p-4">
                 <AlertCircle className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground mb-3">{error}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setManualInput(true)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setManualInput(true)}>
                   Enter manually
                 </Button>
               </div>

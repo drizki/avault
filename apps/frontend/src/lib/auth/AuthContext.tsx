@@ -53,9 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login() {
     try {
       // Call the backend to get the Google OAuth URL
-      const response = await api.post<{ authUrl: string; state: string }>(
-        '/auth/login/google'
-      )
+      const response = await api.post<{ authUrl: string; state: string }>('/auth/login/google')
 
       if (response.success && response.data) {
         // Redirect to Google OAuth
@@ -63,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         throw new Error(response.error || 'Failed to initialize login')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error)
       throw error
     }

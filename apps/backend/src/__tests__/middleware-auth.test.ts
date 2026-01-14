@@ -1,10 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { Hono } from 'hono'
 import { requireAuth, requireAdmin, optionalAuth } from '../middleware/auth'
 import { generateToken } from '../lib/auth/jwt'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ApiResponse = { success: boolean; data?: any; error?: string; userId?: string; userRole?: string }
+type ApiResponse = {
+  success: boolean
+  data?: any
+  error?: string
+  userId?: string
+  userRole?: string
+}
 
 describe('auth middleware', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,7 +28,7 @@ describe('auth middleware', () => {
       const res = await app.request('/')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Authentication required')
     })
 
@@ -46,7 +52,7 @@ describe('auth middleware', () => {
       })
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Invalid or expired token')
     })
 
@@ -65,7 +71,7 @@ describe('auth middleware', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.userId).toBe('user-123')
     })
 
@@ -88,7 +94,7 @@ describe('auth middleware', () => {
         headers: { cookie: `auth_token=${token}` },
       })
 
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.userId).toBe('admin-456')
       expect(body.userRole).toBe('ADMIN')
     })
@@ -111,7 +117,7 @@ describe('auth middleware', () => {
       })
 
       expect(res.status).toBe(403)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Admin access required')
     })
 
@@ -142,7 +148,7 @@ describe('auth middleware', () => {
       const res = await app.request('/')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.userId).toBe('anonymous')
     })
 
@@ -161,7 +167,7 @@ describe('auth middleware', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.userId).toBe('user-789')
     })
 
@@ -174,7 +180,7 @@ describe('auth middleware', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.userId).toBe('anonymous')
     })
   })

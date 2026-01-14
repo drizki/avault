@@ -131,7 +131,10 @@ export function DestinationsPanel() {
           ) : (
             <div className="divide-y divide-border h-full overflow-y-auto">
               {destinations.map((dest) => (
-                <div key={dest.id} className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors">
+                <div
+                  key={dest.id}
+                  className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors"
+                >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     {getProviderIcon(dest.provider)}
                     <div className="min-w-0 flex-1">

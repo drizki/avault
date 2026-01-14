@@ -104,7 +104,7 @@ jobs:
         run: pnpm db:generate
 
       - name: Push database schema
-        run: cd packages/shared && prisma db push
+        run: cd packages/shared && pnpm exec prisma db push
 
       - name: Run tests
         run: pnpm test

@@ -19,14 +19,15 @@ export function validateCronExpression(expression: string): boolean {
  * Gets the next run time from a cron expression
  * @param cronExpression - Cron expression (5-field format)
  * @param fromDate - Optional date to calculate from (defaults to now)
- * @returns Next run date in UTC
+ * @returns Next run date in configured timezone (TIMEZONE env var, defaults to UTC)
  */
 export function getNextRunTime(cronExpression: string, fromDate?: Date): Date {
   try {
     const from = fromDate || new Date()
+    const timezone = process.env.TIMEZONE || 'UTC'
     const interval = CronExpressionParser.parse(cronExpression, {
       currentDate: from,
-      tz: 'UTC',
+      tz: timezone,
     })
     return interval.next().toDate()
   } catch (error: unknown) {

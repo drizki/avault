@@ -90,6 +90,7 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
   const [isLoadingData, setIsLoadingData] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [schedulePreset, setSchedulePreset] = useState('0 2 * * *')
+  const [timezone, setTimezone] = useState<string>('UTC')
 
   // For enable job dialog after creation
   const [createdJob, setCreatedJob] = useState<CreatedJob | null>(null)
@@ -147,9 +148,10 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
   async function fetchData() {
     setIsLoadingData(true)
     try {
-      const [destResponse, credResponse] = await Promise.all([
+      const [destResponse, credResponse, timezoneResponse] = await Promise.all([
         api.get<Destination[]>('/destinations'),
         api.get<Credential[]>('/credentials'),
+        api.get<{ timezone: string }>('/dashboard/timezone'),
       ])
 
       if (destResponse.success && destResponse.data) {
@@ -157,6 +159,9 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
       }
       if (credResponse.success && credResponse.data) {
         setCredentials(credResponse.data)
+      }
+      if (timezoneResponse.success && timezoneResponse.data) {
+        setTimezone(timezoneResponse.data.timezone)
       }
     } catch (error) {
       console.error('Failed to fetch data:', error)
@@ -378,7 +383,7 @@ export function JobFormSheet({ open, onOpenChange, onSuccess, editJob }: JobForm
                   />
                 )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  Cron format: minute hour day month weekday
+                  Cron format: minute hour day month weekday (times in {timezone})
                 </p>
               </div>
 

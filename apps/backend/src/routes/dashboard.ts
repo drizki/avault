@@ -775,4 +775,16 @@ dashboard.get('/stream', async (c) => {
   })
 })
 
+/**
+ * GET /api/dashboard/timezone
+ * Get the configured system timezone
+ */
+dashboard.get('/timezone', (c) => {
+  const timezone = process.env.TIMEZONE || 'UTC'
+  return c.json({
+    success: true,
+    data: { timezone },
+  })
+})
+
 export default dashboard

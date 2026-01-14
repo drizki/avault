@@ -57,6 +57,7 @@ services:
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       NAS_MOUNT_PATH: /nas
+      TIMEZONE: ${TIMEZONE:-UTC}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - ${NAS_MOUNT_PATH:-/mnt/nas}:/nas:ro

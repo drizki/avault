@@ -106,8 +106,8 @@ jobs:
       - name: Push database schema
         run: cd packages/shared && pnpm exec prisma db push
 
-      - name: Build shared package
-        run: pnpm --filter @avault/shared build
+      - name: Build packages
+        run: pnpm --filter @avault/shared --filter @avault/storage build
 
       - name: Run tests
         run: pnpm test

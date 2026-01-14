@@ -171,7 +171,9 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     for (let i = 0; i < sortedPaths.length; i++) {
       const dirPath = sortedPaths[i]
       if (i % 10 === 0) {
-        console.log(`[preBuildFolderStructure] Progress: ${i}/${sortedPaths.length} folders processed`)
+        console.log(
+          `[preBuildFolderStructure] Progress: ${i}/${sortedPaths.length} folders processed`
+        )
       }
       const fullCacheKey = `${destinationId}:${rootFolderName}/${dirPath}`
       if (this.folderCache.has(fullCacheKey)) {
@@ -228,7 +230,9 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
 
       this.folderCache.set(fullCacheKey, folderId)
     }
-    console.log(`[preBuildFolderStructure] Complete! Created ${createdCount} new folders, reused ${sortedPaths.length - createdCount} existing folders`)
+    console.log(
+      `[preBuildFolderStructure] Complete! Created ${createdCount} new folders, reused ${sortedPaths.length - createdCount} existing folders`
+    )
   }
 
   /**

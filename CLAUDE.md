@@ -156,6 +156,7 @@ Required variables (see `.env.example`):
 
 ```bash
 pnpm lint          # Must pass with no errors
+pnpm format:check  # Must pass with no formatting issues
 pnpm test          # Must pass all tests
 pnpm build         # Must build successfully
 ```

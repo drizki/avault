@@ -61,8 +61,11 @@ services:
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
+      NAS_MOUNT_PATH: /nas
     ports:
       - '${BACKEND_PORT:-4000}:4000'
+    volumes:
+      - ${NAS_MOUNT_PATH:-./test-nas}:/nas:ro
     depends_on:
       postgres:
         condition: service_healthy

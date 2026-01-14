@@ -108,7 +108,7 @@ function Dashboard() {
   async function connectToLogs() {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-      const tokenResponse = await fetch(`${apiUrl}/api/auth/token`, {
+      const tokenResponse = await fetch(`${apiUrl}/auth/token`, {
         credentials: 'include',
       })
 
@@ -118,7 +118,7 @@ function Dashboard() {
       if (!tokenData.success || !tokenData.data?.token) return
 
       const token = tokenData.data.token
-      const url = `${apiUrl}/api/logs?token=${encodeURIComponent(token)}`
+      const url = `${apiUrl}/logs?token=${encodeURIComponent(token)}`
 
       const eventSource = new EventSource(url)
       eventSourceRef.current = eventSource

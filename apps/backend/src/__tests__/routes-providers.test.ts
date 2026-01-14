@@ -20,7 +20,7 @@ describe('providers routes', () => {
       const res = await app.request('/api/providers')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toHaveProperty('google_drive_shared')
       expect(body.data).toHaveProperty('google_drive_my_drive')
@@ -32,7 +32,7 @@ describe('providers routes', () => {
 
     it('includes provider details', async () => {
       const res = await app.request('/api/providers')
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       const s3Provider = body.data.s3
       expect(s3Provider).toHaveProperty('id', 's3')
@@ -44,7 +44,7 @@ describe('providers routes', () => {
 
     it('includes OAuth providers', async () => {
       const res = await app.request('/api/providers')
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       expect(body.data.google_drive_shared.authType).toBe('oauth')
       expect(body.data.google_drive_my_drive.authType).toBe('oauth')
@@ -52,7 +52,7 @@ describe('providers routes', () => {
 
     it('includes service account providers', async () => {
       const res = await app.request('/api/providers')
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       expect(body.data.google_cloud_storage.authType).toBe('service_account')
     })
@@ -63,7 +63,7 @@ describe('providers routes', () => {
       const res = await app.request('/api/providers/s3')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.id).toBe('s3')
       expect(body.data.name).toBe('Amazon S3')
@@ -71,7 +71,7 @@ describe('providers routes', () => {
 
     it('returns Google Drive Shared config', async () => {
       const res = await app.request('/api/providers/google_drive_shared')
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       expect(body.data).toEqual({
         id: 'google_drive_shared',
@@ -85,7 +85,7 @@ describe('providers routes', () => {
 
     it('returns Cloudflare R2 config with required fields', async () => {
       const res = await app.request('/api/providers/cloudflare_r2')
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       expect(body.data.id).toBe('cloudflare_r2')
       expect(body.data.fields).toEqual(
@@ -101,14 +101,14 @@ describe('providers routes', () => {
       const res = await app.request('/api/providers/dropbox')
 
       expect(res.status).toBe(404)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('Provider not found')
     })
 
     it('returns region options for S3', async () => {
       const res = await app.request('/api/providers/s3')
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       const regionField = body.data.fields.find((f: any) => f.name === 'region')
       expect(regionField.type).toBe('select')
@@ -122,7 +122,7 @@ describe('providers routes', () => {
 
     it('returns region options for DigitalOcean Spaces', async () => {
       const res = await app.request('/api/providers/digitalocean_spaces')
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
 
       const regionField = body.data.fields.find((f: any) => f.name === 'region')
       expect(regionField.options).toEqual(

@@ -34,7 +34,9 @@ const mocks = vi.hoisted(() => {
     shutdownLogBuffer,
     executeBackupJob,
     getCapturedProcessor: () => capturedProcessor,
-    setCapturedProcessor: (p: any) => { capturedProcessor = p },
+    setCapturedProcessor: (p: any) => {
+      capturedProcessor = p
+    },
   }
 })
 

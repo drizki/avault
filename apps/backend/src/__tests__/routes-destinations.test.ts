@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Hono } from 'hono'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ApiResponse = { success: boolean; data?: any; error?: string; message?: string; details?: string }
+type ApiResponse = {
+  success: boolean
+  data?: any
+  error?: string
+  message?: string
+  details?: string
+}
 
 const mocks = vi.hoisted(() => ({
   destinationFindMany: vi.fn(),
@@ -86,14 +92,19 @@ describe('destinations routes', () => {
   describe('GET /api/destinations', () => {
     it('returns list of user destinations', async () => {
       const mockDestinations = [
-        { id: 'dest-1', name: 'S3 Bucket', provider: 's3', credential: { id: 'cred-1', name: 'My S3', provider: 's3' } },
+        {
+          id: 'dest-1',
+          name: 'S3 Bucket',
+          provider: 's3',
+          credential: { id: 'cred-1', name: 'My S3', provider: 's3' },
+        },
       ]
       mocks.destinationFindMany.mockResolvedValue(mockDestinations)
 
       const res = await app.request('/api/destinations')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toHaveLength(1)
     })
@@ -135,7 +146,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(201)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
     })
 
@@ -165,7 +176,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to create destination')
       expect(body.details).toBe('Foreign key constraint')
     })
@@ -182,7 +193,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/dest-1')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.id).toBe('dest-1')
     })
 
@@ -211,7 +222,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.name).toBe('Updated Name')
     })
 
@@ -238,7 +249,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to update destination')
     })
   })
@@ -251,7 +262,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/dest-1', { method: 'DELETE' })
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.message).toBe('Destination deleted successfully')
     })
 
@@ -270,7 +281,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/dest-1', { method: 'DELETE' })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to delete destination')
     })
   })
@@ -297,7 +308,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(201)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.id).toBe('drive-new')
     })
 
@@ -309,7 +320,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('name')
     })
 
@@ -338,7 +349,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('Google Drive')
     })
 
@@ -360,7 +371,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to create Shared Drive')
       expect(body.details).toBe('API quota exceeded')
     })
@@ -411,7 +422,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/browse/cred-1')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data).toHaveLength(2)
     })
 
@@ -439,7 +450,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/browse/cred-1')
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('not supported')
     })
 
@@ -458,7 +469,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/browse/cred-1')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to list available destinations')
     })
   })
@@ -484,7 +495,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/browse/cred-1/bucket-1/folders')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data).toHaveLength(1)
     })
 
@@ -503,7 +514,9 @@ describe('destinations routes', () => {
       })
       mocks.adapterListFolders.mockResolvedValue([])
 
-      await app.request('/api/destinations/browse/cred-1/bucket-1/folders?parentFolderId=parent-123')
+      await app.request(
+        '/api/destinations/browse/cred-1/bucket-1/folders?parentFolderId=parent-123'
+      )
 
       expect(mocks.adapterListFolders).toHaveBeenCalledWith('bucket-1', 'parent-123')
     })
@@ -532,7 +545,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/browse/cred-1/bucket-1/folders')
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('not supported')
     })
 
@@ -551,7 +564,7 @@ describe('destinations routes', () => {
       const res = await app.request('/api/destinations/browse/cred-1/bucket-1/folders')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to list folders')
     })
   })
@@ -583,7 +596,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(201)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.name).toBe('New Folder')
     })
 
@@ -595,7 +608,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('name')
     })
 
@@ -631,7 +644,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(400)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toContain('not supported')
     })
 
@@ -654,7 +667,7 @@ describe('destinations routes', () => {
       })
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to create folder')
     })
 

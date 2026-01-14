@@ -148,7 +148,11 @@ export class GoogleDriveMyDriveAdapter extends StorageAdapter {
     // Upload with progress tracking
     let bytesUploaded = 0
     const progressStream = new Transform({
-      transform(chunk: Buffer, _encoding: string, callback: (error?: Error | null, data?: Buffer) => void) {
+      transform(
+        chunk: Buffer,
+        _encoding: string,
+        callback: (error?: Error | null, data?: Buffer) => void
+      ) {
         bytesUploaded += chunk.length
         if (params.onProgress) {
           params.onProgress({
@@ -185,7 +189,11 @@ export class GoogleDriveMyDriveAdapter extends StorageAdapter {
     }
   }
 
-  async createFolder(destinationId: string, name: string, parentFolderId?: string): Promise<StorageFolder> {
+  async createFolder(
+    destinationId: string,
+    name: string,
+    parentFolderId?: string
+  ): Promise<StorageFolder> {
     if (!this.drive) throw new Error('Adapter not initialized')
 
     // For My Drive, use 'root' if no parent specified

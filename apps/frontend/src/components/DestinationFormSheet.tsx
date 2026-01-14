@@ -45,7 +45,9 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCreatingDrive, setIsCreatingDrive] = useState(false)
 
-  const [step, setStep] = useState<'select-credential' | 'select-destination' | 'confirm'>('select-credential')
+  const [step, setStep] = useState<'select-credential' | 'select-destination' | 'confirm'>(
+    'select-credential'
+  )
 
   useEffect(() => {
     if (open) {
@@ -103,9 +105,12 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
 
     setIsCreatingDrive(true)
     try {
-      const response = await api.post<AvailableDestination>(`/destinations/create-drive/${selectedCredentialId}`, {
-        name: newDriveName.trim(),
-      })
+      const response = await api.post<AvailableDestination>(
+        `/destinations/create-drive/${selectedCredentialId}`,
+        {
+          name: newDriveName.trim(),
+        }
+      )
 
       if (response.success && response.data) {
         setAvailableDestinations([response.data, ...availableDestinations])
@@ -125,7 +130,7 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
 
     setIsSubmitting(true)
     try {
-      const selectedCredential = credentials.find(c => c.id === selectedCredentialId)
+      const selectedCredential = credentials.find((c) => c.id === selectedCredentialId)
       if (!selectedCredential) return
 
       const response = await api.post('/destinations', {
@@ -237,7 +242,12 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
           {step === 'select-destination' && (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setStep('select-credential')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setStep('select-credential')}
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <Label>Select Destination</Label>
@@ -254,7 +264,9 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
                   <div className="border border-border p-3 bg-secondary/30">
                     <form onSubmit={handleCreateDrive} className="space-y-3">
                       <div>
-                        <Label htmlFor="newDriveName" className="text-xs">Create New Shared Drive</Label>
+                        <Label htmlFor="newDriveName" className="text-xs">
+                          Create New Shared Drive
+                        </Label>
                       </div>
                       <div className="flex gap-2">
                         <Input
@@ -270,7 +282,11 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
                           disabled={!newDriveName.trim() || isCreatingDrive}
                           size="sm"
                         >
-                          {isCreatingDrive ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
+                          {isCreatingDrive ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'Create'
+                          )}
                         </Button>
                       </div>
                     </form>
@@ -310,7 +326,12 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
           {step === 'confirm' && selectedDestination && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setStep('select-destination')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setStep('select-destination')}
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <Label>Confirm Destination</Label>
@@ -341,7 +362,11 @@ export function DestinationFormSheet({ open, onOpenChange, onSuccess }: Destinat
               </div>
 
               <SheetFooter className="pt-4">
-                <Button type="button" variant="outline" onClick={() => setStep('select-destination')}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep('select-destination')}
+                >
                   Back
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>

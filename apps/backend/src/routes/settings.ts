@@ -26,10 +26,13 @@ settings.get('/', async (c) => {
     })
   } catch (error: unknown) {
     logger.error({ error }, 'Failed to fetch settings')
-    return c.json({
-      success: false,
-      error: 'Failed to fetch settings',
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch settings',
+      },
+      500
+    )
   }
 })
 
@@ -46,10 +49,13 @@ settings.get('/:key', async (c) => {
     const value = await settingsService.get(key, null)
 
     if (value === null) {
-      return c.json({
-        success: false,
-        error: 'Setting not found',
-      }, 404)
+      return c.json(
+        {
+          success: false,
+          error: 'Setting not found',
+        },
+        404
+      )
     }
 
     return c.json({
@@ -61,10 +67,13 @@ settings.get('/:key', async (c) => {
     })
   } catch (error: unknown) {
     logger.error({ error }, 'Failed to fetch setting')
-    return c.json({
-      success: false,
-      error: 'Failed to fetch setting',
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch setting',
+      },
+      500
+    )
   }
 })
 
@@ -82,10 +91,13 @@ settings.put('/:key', async (c) => {
     const { value } = body
 
     if (value === undefined) {
-      return c.json({
-        success: false,
-        error: 'Value is required',
-      }, 400)
+      return c.json(
+        {
+          success: false,
+          error: 'Value is required',
+        },
+        400
+      )
     }
 
     const settingsService = new SettingsService(db)
@@ -100,10 +112,13 @@ settings.put('/:key', async (c) => {
     })
   } catch (error: unknown) {
     logger.error({ error }, 'Failed to update setting')
-    return c.json({
-      success: false,
-      error: 'Failed to update setting',
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to update setting',
+      },
+      500
+    )
   }
 })
 

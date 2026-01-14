@@ -77,10 +77,7 @@ describe('executor helpers', () => {
       '.fseventsd',
     ])
 
-    const OS_JUNK_DIRECTORIES = new Set([
-      '$RECYCLE.BIN',
-      'System Volume Information',
-    ])
+    const OS_JUNK_DIRECTORIES = new Set(['$RECYCLE.BIN', 'System Volume Information'])
 
     it('identifies macOS junk files', () => {
       expect(OS_JUNK_FILES.has('.DS_Store')).toBe(true)

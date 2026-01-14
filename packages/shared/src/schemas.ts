@@ -36,12 +36,12 @@ export const UpdateSettingSchema = z.object({
 // ============================================================================
 
 export const StorageProviderEnum = z.enum([
-  'google_drive_shared',    // Google Workspace Shared Drives (renamed from 'google_drive')
-  'google_drive_my_drive',  // Personal Google Drive
-  'google_cloud_storage',   // Google Cloud Storage (Service Account)
-  's3',                     // Amazon S3
-  'cloudflare_r2',          // Cloudflare R2 (S3-compatible)
-  'digitalocean_spaces',    // DigitalOcean Spaces (S3-compatible)
+  'google_drive_shared', // Google Workspace Shared Drives (renamed from 'google_drive')
+  'google_drive_my_drive', // Personal Google Drive
+  'google_cloud_storage', // Google Cloud Storage (Service Account)
+  's3', // Amazon S3
+  'cloudflare_r2', // Cloudflare R2 (S3-compatible)
+  'digitalocean_spaces', // DigitalOcean Spaces (S3-compatible)
 ])
 
 export type StorageProvider = z.infer<typeof StorageProviderEnum>
@@ -78,10 +78,10 @@ export const S3CredentialDataSchema = z.object({
   access_key_id: z.string().min(1, 'Access Key ID is required'),
   secret_access_key: z.string().min(1, 'Secret Access Key is required'),
   region: z.string().default('us-east-1'),
-  endpoint: z.string().url().optional(),       // Required for non-AWS S3 providers
-  bucket: z.string().optional(),               // Can be pre-selected or chosen later
+  endpoint: z.string().url().optional(), // Required for non-AWS S3 providers
+  bucket: z.string().optional(), // Can be pre-selected or chosen later
   force_path_style: z.boolean().default(false), // Required for some S3-compatible providers
-  account_id: z.string().optional(),           // For Cloudflare R2
+  account_id: z.string().optional(), // For Cloudflare R2
 })
 
 // Google Cloud Storage service account credentials
@@ -129,10 +129,12 @@ export const UpdateDestinationSchema = CreateDestinationSchema.partial().omit({
 
 export const RetentionTypeEnum = z.enum(['VERSION_COUNT', 'DAYS', 'HYBRID'])
 
-export const CronExpressionSchema = z.string().regex(
-  /^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/,
-  'Invalid cron expression (use format: "minute hour day month weekday")'
-)
+export const CronExpressionSchema = z
+  .string()
+  .regex(
+    /^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/,
+    'Invalid cron expression (use format: "minute hour day month weekday")'
+  )
 
 const BaseBackupJobSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -206,10 +208,7 @@ export const BackupStatusEnum = z.enum([
   'CANCELLED',
 ])
 
-export const TriggerSourceEnum = z.enum([
-  'MANUAL',
-  'SCHEDULED',
-])
+export const TriggerSourceEnum = z.enum(['MANUAL', 'SCHEDULED'])
 
 export const BackupHistoryQuerySchema = z.object({
   jobId: z.string().cuid().optional(),

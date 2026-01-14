@@ -85,15 +85,17 @@ describe('token-refresh', () => {
       const encryptedCred = createEncryptedCredential(mockCredentials, 's3')
       const mockDb = createMockDb(encryptedCred)
 
-      await expect(getValidGoogleTokens('cred-123', mockDb as any))
-        .rejects.toThrow('Credential not found or invalid provider')
+      await expect(getValidGoogleTokens('cred-123', mockDb as any)).rejects.toThrow(
+        'Credential not found or invalid provider'
+      )
     })
 
     it('throws when credential not found', async () => {
       const mockDb = createMockDb(null)
 
-      await expect(getValidGoogleTokens('nonexistent', mockDb as any))
-        .rejects.toThrow('Credential not found or invalid provider')
+      await expect(getValidGoogleTokens('nonexistent', mockDb as any)).rejects.toThrow(
+        'Credential not found or invalid provider'
+      )
     })
   })
 
@@ -171,8 +173,9 @@ describe('token-refresh', () => {
 
       mockRefreshAccessToken.mockRejectedValue(new Error('invalid_grant'))
 
-      await expect(getValidGoogleTokens('cred-123', mockDb as any))
-        .rejects.toThrow('Failed to refresh access token. Credential may need re-authorization.')
+      await expect(getValidGoogleTokens('cred-123', mockDb as any)).rejects.toThrow(
+        'Failed to refresh access token. Credential may need re-authorization.'
+      )
     })
   })
 })

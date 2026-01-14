@@ -3,12 +3,12 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
 
 env:
   REGISTRY: ghcr.io
-  NODE_VERSION: "20"
-  PNPM_VERSION: "9.15.0"
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.0'
 
 jobs:
   release:

@@ -93,8 +93,14 @@ export interface ChartDataPoint {
 type DashboardEvent =
   | { type: 'connected' }
   | { type: 'stats:update'; payload: DashboardStats }
-  | { type: 'job:started'; payload: { historyId: string; jobId: string; jobName: string; startedAt: string } }
-  | { type: 'job:progress'; payload: ActiveJob['progress'] & { historyId: string; jobId: string; jobName: string } }
+  | {
+      type: 'job:started'
+      payload: { historyId: string; jobId: string; jobName: string; startedAt: string }
+    }
+  | {
+      type: 'job:progress'
+      payload: ActiveJob['progress'] & { historyId: string; jobId: string; jobName: string }
+    }
   | { type: 'job:completed'; payload: { historyId: string; jobId: string; status: string } }
   | { type: 'queue:update'; payload: DashboardStats['queue'] }
   | { type: 'health:update'; payload: { worker: string; timestamp: string } }

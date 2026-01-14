@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -45,9 +40,7 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
   async function loadSettings() {
     setIsFetching(true)
     try {
-      const res = await api.get<{ key: string; value: boolean }>(
-        '/settings/auth.allowSignups'
-      )
+      const res = await api.get<{ key: string; value: boolean }>('/settings/auth.allowSignups')
       if (res.success && res.data) {
         setAllowSignups(res.data.value)
       }

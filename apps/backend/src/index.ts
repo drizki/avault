@@ -60,10 +60,13 @@ const scheduler = initScheduler(db, schedulerRedis)
 const app = new Hono<Env>()
 
 // Global middleware
-app.use('*', cors({
-  origin: FRONTEND_URL,
-  credentials: true,
-}))
+app.use(
+  '*',
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+  })
+)
 
 // Attach Prisma to context
 app.use('*', async (c, next) => {
@@ -99,19 +102,25 @@ app.route('/api/dashboard', dashboardRoutes)
 app.onError((err, c) => {
   logger.error({ err }, 'Global error handler')
 
-  return c.json({
-    success: false,
-    error: err.message || 'Internal server error',
-    details: NODE_ENV === 'development' ? err.stack : undefined,
-  }, 500)
+  return c.json(
+    {
+      success: false,
+      error: err.message || 'Internal server error',
+      details: NODE_ENV === 'development' ? err.stack : undefined,
+    },
+    500
+  )
 })
 
 // 404 handler
 app.notFound((c) => {
-  return c.json({
-    success: false,
-    error: 'Not found',
-  }, 404)
+  return c.json(
+    {
+      success: false,
+      error: 'Not found',
+    },
+    404
+  )
 })
 
 // Start server
@@ -124,11 +133,16 @@ serve({
 systemLog.info(`Backend server running at http://localhost:${PORT}`)
 
 // Start scheduler after server is running
-scheduler.start().then(() => {
-  systemLog.info('Backup scheduler started successfully')
-}).catch((err: unknown) => {
-  systemLog.error('Failed to start backup scheduler', { error: err instanceof Error ? err.message : 'Unknown error' })
-})
+scheduler
+  .start()
+  .then(() => {
+    systemLog.info('Backup scheduler started successfully')
+  })
+  .catch((err: unknown) => {
+    systemLog.error('Failed to start backup scheduler', {
+      error: err instanceof Error ? err.message : 'Unknown error',
+    })
+  })
 
 // Note: Log cleanup is scheduled by the cleanup-worker process
 // Run it separately with: pnpm --filter @avault/worker start:cleanup

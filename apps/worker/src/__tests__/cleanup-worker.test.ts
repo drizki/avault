@@ -20,7 +20,9 @@ const mocks = vi.hoisted(() => {
     executeLogCleanup,
     scheduleLogCleanup,
     getCapturedProcessor: () => capturedProcessor,
-    setCapturedProcessor: (p: any) => { capturedProcessor = p },
+    setCapturedProcessor: (p: any) => {
+      capturedProcessor = p
+    },
   }
 })
 

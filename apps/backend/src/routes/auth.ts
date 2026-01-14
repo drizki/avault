@@ -39,10 +39,14 @@ auth.post('/login/google', async (c) => {
     const state = crypto.randomBytes(32).toString('hex')
 
     // Store state in Redis with 10-minute TTL
-    await redis.setex(`oauth:state:${state}`, 600, JSON.stringify({
-      provider: 'google',
-      timestamp: Date.now(),
-    }))
+    await redis.setex(
+      `oauth:state:${state}`,
+      600,
+      JSON.stringify({
+        provider: 'google',
+        timestamp: Date.now(),
+      })
+    )
 
     // Generate OAuth URL
     const authUrl = googleOAuth.generateAuthUrl(state)
@@ -56,17 +60,24 @@ auth.post('/login/google', async (c) => {
     })
   } catch (error: unknown) {
     logger.error({ error }, 'Failed to initialize Google OAuth')
-    return c.json({
-      success: false,
-      error: 'Failed to initialize authentication',
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to initialize authentication',
+      },
+      500
+    )
   }
 })
 
 /**
  * Handle credential OAuth callback (for adding storage credentials)
  */
-async function handleCredentialOAuthCallback(c: Context<Env>, code: string, decodedState: Record<string, unknown>) {
+async function handleCredentialOAuthCallback(
+  c: Context<Env>,
+  code: string,
+  decodedState: Record<string, unknown>
+) {
   const db = c.get('db')
   const userId = typeof decodedState.userId === 'string' ? decodedState.userId : null
   const provider = typeof decodedState.provider === 'string' ? decodedState.provider : undefined
@@ -79,9 +90,10 @@ async function handleCredentialOAuthCallback(c: Context<Env>, code: string, deco
   const storageProvider = (provider as string) || 'google_drive_shared'
 
   // Get friendly provider name for display
-  const providerDisplayName = storageProvider === 'google_drive_my_drive'
-    ? 'Google Drive (My Drive)'
-    : 'Google Drive (Shared)'
+  const providerDisplayName =
+    storageProvider === 'google_drive_my_drive'
+      ? 'Google Drive (My Drive)'
+      : 'Google Drive (Shared)'
 
   try {
     // Exchange code for tokens
@@ -119,11 +131,17 @@ async function handleCredentialOAuthCallback(c: Context<Env>, code: string, deco
       },
     })
 
-    logger.info({ userId, email: googleUser.email, provider: storageProvider }, 'Google Drive credential added successfully')
+    logger.info(
+      { userId, email: googleUser.email, provider: storageProvider },
+      'Google Drive credential added successfully'
+    )
 
     return c.redirect(`${process.env.FRONTEND_URL}/credentials?success=credential_added`)
   } catch (error: unknown) {
-    logger.error({ error: error instanceof Error ? error.message : String(error), provider: storageProvider }, 'Failed to process Google Drive OAuth callback')
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error), provider: storageProvider },
+      'Failed to process Google Drive OAuth callback'
+    )
     return c.redirect(`${process.env.FRONTEND_URL}/credentials?error=oauth_failed`)
   }
 }
@@ -292,10 +310,13 @@ auth.get('/me', requireAuth, async (c) => {
     })
 
     if (!user) {
-      return c.json({
-        success: false,
-        error: 'User not found',
-      }, 404)
+      return c.json(
+        {
+          success: false,
+          error: 'User not found',
+        },
+        404
+      )
     }
 
     return c.json({
@@ -304,10 +325,13 @@ auth.get('/me', requireAuth, async (c) => {
     })
   } catch (error: unknown) {
     logger.error({ error }, 'Failed to fetch user')
-    return c.json({
-      success: false,
-      error: 'Failed to fetch user data',
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch user data',
+      },
+      500
+    )
   }
 })
 
@@ -334,10 +358,13 @@ auth.get('/status', async (c) => {
     })
   } catch (error: unknown) {
     logger.error({ error }, 'Failed to get auth status')
-    return c.json({
-      success: false,
-      error: 'Failed to get system status',
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to get system status',
+      },
+      500
+    )
   }
 })
 

@@ -135,10 +135,7 @@ describe('job-lock', () => {
 
       await releaseJobLock(mockRedis as any, 'job-456')
 
-      expect(mocks.loggerDebug).toHaveBeenCalledWith(
-        { jobId: 'job-456' },
-        'Job lock released'
-      )
+      expect(mocks.loggerDebug).toHaveBeenCalledWith({ jobId: 'job-456' }, 'Job lock released')
     })
 
     it('handles errors gracefully', async () => {

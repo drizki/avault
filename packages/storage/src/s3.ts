@@ -101,9 +101,7 @@ export class S3Adapter extends StorageAdapter {
   async uploadFile(params: UploadFileParams): Promise<UploadFileResult> {
     if (!this.client) throw new Error('Adapter not initialized')
 
-    const key = params.folderPath
-      ? `${params.folderPath}/${params.fileName}`
-      : params.fileName
+    const key = params.folderPath ? `${params.folderPath}/${params.fileName}` : params.fileName
 
     const upload = new Upload({
       client: this.client,
@@ -135,7 +133,11 @@ export class S3Adapter extends StorageAdapter {
     }
   }
 
-  async createFolder(bucketName: string, name: string, parentPath?: string): Promise<StorageFolder> {
+  async createFolder(
+    bucketName: string,
+    name: string,
+    parentPath?: string
+  ): Promise<StorageFolder> {
     if (!this.client) throw new Error('Adapter not initialized')
 
     // S3 doesn't have real folders - we create a placeholder object

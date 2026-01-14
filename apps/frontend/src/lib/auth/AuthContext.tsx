@@ -53,9 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login() {
     try {
       // Call the backend to get the Google OAuth URL
-      const response = await api.post<{ authUrl: string; state: string }>(
-        '/auth/login/google'
-      )
+      const response = await api.post<{ authUrl: string; state: string }>('/auth/login/google')
 
       if (response.success && response.data) {
         // Redirect to Google OAuth

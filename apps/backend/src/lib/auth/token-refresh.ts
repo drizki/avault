@@ -29,16 +29,17 @@ export async function getValidGoogleTokens(
     where: { id: credentialId },
   })
 
-  if (!credential || !GOOGLE_OAUTH_PROVIDERS.includes(credential.provider as typeof GOOGLE_OAUTH_PROVIDERS[number])) {
-    throw new Error(`Credential not found or invalid provider. Expected one of: ${GOOGLE_OAUTH_PROVIDERS.join(', ')}`)
+  if (
+    !credential ||
+    !GOOGLE_OAUTH_PROVIDERS.includes(credential.provider as (typeof GOOGLE_OAUTH_PROVIDERS)[number])
+  ) {
+    throw new Error(
+      `Credential not found or invalid provider. Expected one of: ${GOOGLE_OAUTH_PROVIDERS.join(', ')}`
+    )
   }
 
   // Decrypt stored credentials
-  const decryptedData = decrypt(
-    credential.encryptedData,
-    credential.iv,
-    credential.authTag
-  )
+  const decryptedData = decrypt(credential.encryptedData, credential.iv, credential.authTag)
   const credentials: StoredCredentials = JSON.parse(decryptedData)
 
   // Check if access token is expired or about to expire (within 5 minutes)
@@ -80,9 +81,7 @@ export async function getValidGoogleTokens(
     }
 
     // Encrypt and save updated credentials
-    const { encryptedData, iv, authTag } = encrypt(
-      JSON.stringify(updatedCredentials)
-    )
+    const { encryptedData, iv, authTag } = encrypt(JSON.stringify(updatedCredentials))
 
     await db.storageCredential.update({
       where: { id: credentialId },

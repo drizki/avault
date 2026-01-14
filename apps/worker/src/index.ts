@@ -29,7 +29,8 @@ function startHeartbeat() {
 
   // Send heartbeat every 30 seconds
   heartbeatInterval = setInterval(() => {
-    dashboardRedis.set('worker:heartbeat', Date.now().toString(), 'EX', 60)
+    dashboardRedis
+      .set('worker:heartbeat', Date.now().toString(), 'EX', 60)
       .catch((err) => logger.error({ err }, 'Failed to send heartbeat'))
   }, 30000)
 
@@ -153,7 +154,10 @@ const worker = new Worker<BackupJobData>(
 
       return result
     } catch (error: unknown) {
-      workerSystemLog.error(`Backup job failed: ${error instanceof Error ? error.message : String(error)}`, { jobId })
+      workerSystemLog.error(
+        `Backup job failed: ${error instanceof Error ? error.message : String(error)}`,
+        { jobId }
+      )
       logger.error({ jobId, error }, 'Backup job failed')
 
       await db.backupHistory.update({

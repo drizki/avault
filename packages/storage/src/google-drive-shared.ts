@@ -225,7 +225,11 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
   /**
    * Get folder ID from cache.
    */
-  private getCachedFolderId(destinationId: string, rootFolderName: string, relativeDirPath: string): string | undefined {
+  private getCachedFolderId(
+    destinationId: string,
+    rootFolderName: string,
+    relativeDirPath: string
+  ): string | undefined {
     if (relativeDirPath === '') {
       const rootCacheKey = `${destinationId}:${rootFolderName}`
       return this.folderCache.get(rootCacheKey)
@@ -244,7 +248,11 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     const relativeDirPath = directories.join('/')
 
     // Try to get parent folder ID from cache first (if preBuildFolderStructure was called)
-    let parentFolderId: string | undefined = this.getCachedFolderId(params.destinationId, params.folderPath, relativeDirPath)
+    let parentFolderId: string | undefined = this.getCachedFolderId(
+      params.destinationId,
+      params.folderPath,
+      relativeDirPath
+    )
 
     // Fallback: if not in cache, find/create folders (for backwards compatibility)
     if (!parentFolderId) {
@@ -304,7 +312,11 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     // Upload with progress tracking
     let bytesUploaded = 0
     const progressStream = new Transform({
-      transform(chunk: Buffer, _encoding: string, callback: (error?: Error | null, data?: Buffer) => void) {
+      transform(
+        chunk: Buffer,
+        _encoding: string,
+        callback: (error?: Error | null, data?: Buffer) => void
+      ) {
         bytesUploaded += chunk.length
         if (params.onProgress) {
           params.onProgress({
@@ -342,7 +354,11 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
     }
   }
 
-  async createFolder(destinationId: string, name: string, parentFolderId?: string): Promise<StorageFolder> {
+  async createFolder(
+    destinationId: string,
+    name: string,
+    parentFolderId?: string
+  ): Promise<StorageFolder> {
     if (!this.drive) throw new Error('Adapter not initialized')
 
     const parentId = parentFolderId || destinationId

@@ -47,10 +47,7 @@ export function getNextRunTime(cronExpression: string, fromDate?: Date): Date {
  * @param lastRun - Last run date (null if never run)
  * @returns Next run date
  */
-export function calculateNextRun(
-  cronExpression: string,
-  lastRun: Date | null
-): Date {
+export function calculateNextRun(cronExpression: string, lastRun: Date | null): Date {
   const from = lastRun || new Date()
   return getNextRunTime(cronExpression, from)
 }

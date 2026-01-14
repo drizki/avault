@@ -20,7 +20,11 @@ vi.mock('@aws-sdk/lib-storage', () => ({
   Upload: vi.fn(),
 }))
 
-import { S3CompatibleAdapter, CloudflareR2Adapter, DigitalOceanSpacesAdapter } from '../s3-compatible'
+import {
+  S3CompatibleAdapter,
+  CloudflareR2Adapter,
+  DigitalOceanSpacesAdapter,
+} from '../s3-compatible'
 
 describe('S3CompatibleAdapter', () => {
   beforeEach(() => {

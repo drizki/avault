@@ -11,9 +11,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="shrink-0 mb-2">
         <Navbar />
       </div>
-      <main className="flex-1 pb-2 md:overflow-hidden">
-        {children}
-      </main>
+      <main className="flex-1 pb-2 md:overflow-hidden">{children}</main>
     </div>
   )
 }

@@ -78,10 +78,10 @@ export function FolderPicker({
 
     try {
       if (type === 'nas') {
-        const currentPath = breadcrumbs.length > 0
-          ? breadcrumbs[breadcrumbs.length - 1].path
-          : '/'
-        const response = await api.get<{ items: FolderItem[] }>(`/nas/browse?path=${encodeURIComponent(currentPath)}`)
+        const currentPath = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].path : '/'
+        const response = await api.get<{ items: FolderItem[] }>(
+          `/nas/browse?path=${encodeURIComponent(currentPath)}`
+        )
         if (response.success && response.data) {
           // Filter only directories
           const dirs = response.data.items
@@ -114,7 +114,10 @@ export function FolderPicker({
   async function handleFolderClick(folder: FolderItem) {
     const newBreadcrumb: BreadcrumbItem = {
       name: folder.name,
-      path: type === 'nas' ? folder.path : `${breadcrumbs[breadcrumbs.length - 1]?.path || ''}/${folder.name}`,
+      path:
+        type === 'nas'
+          ? folder.path
+          : `${breadcrumbs[breadcrumbs.length - 1]?.path || ''}/${folder.name}`,
       folderId: folder.id,
     }
     setBreadcrumbs([...breadcrumbs, newBreadcrumb])
@@ -124,7 +127,9 @@ export function FolderPicker({
       // For NAS, we need to fetch with the new path
       setLoading(true)
       try {
-        const response = await api.get<{ items: FolderItem[] }>(`/nas/browse?path=${encodeURIComponent(folder.path)}`)
+        const response = await api.get<{ items: FolderItem[] }>(
+          `/nas/browse?path=${encodeURIComponent(folder.path)}`
+        )
         if (response.success && response.data) {
           const dirs = response.data.items
             .filter((item: FolderItem) => item.type === 'directory')
@@ -153,8 +158,11 @@ export function FolderPicker({
     if (type === 'nas') {
       // Fetch folders for the NAS path
       setLoading(true)
-      api.get<{ items: FolderItem[] }>(`/nas/browse?path=${encodeURIComponent(targetBreadcrumb?.path || '/')}`)
-        .then(response => {
+      api
+        .get<{ items: FolderItem[] }>(
+          `/nas/browse?path=${encodeURIComponent(targetBreadcrumb?.path || '/')}`
+        )
+        .then((response) => {
           if (response.success && response.data) {
             const dirs = response.data.items
               .filter((item: FolderItem) => item.type === 'directory')
@@ -165,7 +173,7 @@ export function FolderPicker({
             setFolders(dirs)
           }
         })
-        .catch(err => setError(err instanceof Error ? err.message : String(err)))
+        .catch((err) => setError(err instanceof Error ? err.message : String(err)))
         .finally(() => setLoading(false))
     } else {
       fetchFolders(targetBreadcrumb?.folderId)
@@ -255,7 +263,9 @@ export function FolderPicker({
                   onClick={() => handleBreadcrumbClick(index)}
                   className={cn(
                     'hover:text-primary transition-colors px-1 py-0.5 rounded',
-                    index === breadcrumbs.length - 1 ? 'font-medium text-primary' : 'text-muted-foreground'
+                    index === breadcrumbs.length - 1
+                      ? 'font-medium text-primary'
+                      : 'text-muted-foreground'
                   )}
                 >
                   {crumb.name}
@@ -276,11 +286,7 @@ export function FolderPicker({
               <div className="flex flex-col items-center justify-center h-[200px] text-center p-4">
                 <AlertCircle className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground mb-3">{error}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setManualInput(true)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setManualInput(true)}>
                   Enter manually
                 </Button>
               </div>

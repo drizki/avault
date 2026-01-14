@@ -1,56 +1,56 @@
 version: 2
 updates:
   # Root package.json and workspace packages
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: 'weekly'
+      day: 'monday'
     open-pull-requests-limit: 10
     groups:
       dev-dependencies:
         patterns:
-          - "@types/*"
-          - "eslint*"
-          - "prettier*"
-          - "typescript*"
-          - "vitest*"
+          - '@types/*'
+          - 'eslint*'
+          - 'prettier*'
+          - 'typescript*'
+          - 'vitest*'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
       production-dependencies:
         patterns:
-          - "*"
+          - '*'
         exclude-patterns:
-          - "@types/*"
-          - "eslint*"
-          - "prettier*"
-          - "typescript*"
-          - "vitest*"
+          - '@types/*'
+          - 'eslint*'
+          - 'prettier*'
+          - 'typescript*'
+          - 'vitest*'
     labels:
-      - "dependencies"
-      - "automated"
+      - 'dependencies'
+      - 'automated'
     commit-message:
-      prefix: "chore(deps)"
+      prefix: 'chore(deps)'
 
   # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     labels:
-      - "dependencies"
-      - "ci"
+      - 'dependencies'
+      - 'ci'
     commit-message:
-      prefix: "chore(ci)"
+      prefix: 'chore(ci)'
 
   # Docker base images
-  - package-ecosystem: "docker"
-    directory: "/docker"
+  - package-ecosystem: 'docker'
+    directory: '/docker'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     labels:
-      - "dependencies"
-      - "docker"
+      - 'dependencies'
+      - 'docker'
     commit-message:
-      prefix: "chore(docker)"
+      prefix: 'chore(docker)'

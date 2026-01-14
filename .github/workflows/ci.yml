@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "20"
-  PNPM_VERSION: "9.15.0"
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.0'
 
 jobs:
   lint:
@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -79,7 +79,7 @@ jobs:
       GOOGLE_REDIRECT_URI: http://localhost:4000/api/auth/callback/google
       FRONTEND_URL: http://localhost:3000
       COOKIE_DOMAIN: localhost
-      COOKIE_SECURE: "false"
+      COOKIE_SECURE: 'false'
       NAS_MOUNT_PATH: /tmp/nas
       LOG_LEVEL: error
     steps:
@@ -95,7 +95,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -131,7 +131,7 @@ jobs:
       GOOGLE_REDIRECT_URI: http://localhost:4000/api/auth/callback/google
       FRONTEND_URL: http://localhost:3000
       COOKIE_DOMAIN: localhost
-      COOKIE_SECURE: "false"
+      COOKIE_SECURE: 'false'
       NAS_MOUNT_PATH: /tmp/nas
       LOG_LEVEL: error
     steps:
@@ -147,7 +147,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

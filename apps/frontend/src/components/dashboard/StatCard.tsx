@@ -52,12 +52,15 @@ export function StatCard({
           <Skeleton className="h-8 w-20" />
         ) : (
           <div className="flex items-baseline gap-2">
-            <span className={cn('text-2xl font-bold font-mono transition-all duration-200', statusColors[status])}>
+            <span
+              className={cn(
+                'text-2xl font-bold font-mono transition-all duration-200',
+                statusColors[status]
+              )}
+            >
               {value}
             </span>
-            {subValue && (
-              <span className="text-xs text-muted-foreground">{subValue}</span>
-            )}
+            {subValue && <span className="text-xs text-muted-foreground">{subValue}</span>}
             {trend && (
               <span className={cn('text-xs font-medium', trendColors[trend.direction])}>
                 {trend.direction === 'up' && '\u2191'}

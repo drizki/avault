@@ -60,7 +60,6 @@ vi.mock('../lib/queue', () => ({
   },
 }))
 
-
 const mockDb = {
   backupJob: {
     count: mocks.jobCount,
@@ -128,7 +127,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/stats')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.jobs.total).toBe(10)
       expect(body.data.jobs.enabled).toBe(8)
@@ -154,7 +153,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/stats')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.jobs.total).toBe(0)
       expect(body.data.history.successRate).toBe(100) // Default when no history
     })
@@ -165,7 +164,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/stats')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to fetch dashboard stats')
     })
   })
@@ -201,7 +200,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/active')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.jobs).toHaveLength(1)
       expect(body.data.jobs[0].jobName).toBe('Daily Backup')
@@ -227,7 +226,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/active')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.jobs[0].progress.filesScanned).toBe(100) // From DB
     })
 
@@ -238,7 +237,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/active')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.jobs).toHaveLength(0)
     })
 
@@ -248,7 +247,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/active')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to fetch active jobs')
     })
   })
@@ -269,7 +268,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/upcoming')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.jobs).toHaveLength(1)
       expect(body.data.jobs[0].name).toBe('Daily Backup')
@@ -282,7 +281,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/upcoming')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.jobs).toHaveLength(0)
     })
 
@@ -292,7 +291,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/upcoming')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to fetch upcoming jobs')
     })
   })
@@ -323,7 +322,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/chart-data')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.period).toBe('7d')
       expect(body.data.daily).toBeDefined()
@@ -336,7 +335,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/chart-data?period=30d')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.period).toBe('30d')
     })
 
@@ -346,7 +345,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/chart-data?period=90d')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.period).toBe('90d')
     })
 
@@ -356,7 +355,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/chart-data')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to fetch chart data')
     })
   })
@@ -380,7 +379,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/alerts')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.alerts).toHaveLength(1)
       expect(body.data.alerts[0].type).toBe('backup_failed')
@@ -403,7 +402,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/alerts')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.alerts).toHaveLength(1)
       expect(body.data.alerts[0].type).toBe('credential_expiring')
       expect(body.data.alerts[0].severity).toBe('warning')
@@ -425,7 +424,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/alerts')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.alerts).toHaveLength(1)
       expect(body.data.alerts[0].type).toBe('credential_expired')
       expect(body.data.alerts[0].severity).toBe('critical')
@@ -461,7 +460,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/alerts')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.alerts).toHaveLength(3)
       // Critical should be first
       expect(body.data.alerts[0].severity).toBe('critical')
@@ -478,7 +477,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/alerts')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.alerts).toHaveLength(0)
       expect(body.data.unreadCount).toBe(0)
     })
@@ -489,7 +488,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/alerts')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to fetch alerts')
     })
   })
@@ -499,7 +498,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/stream')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Authentication required')
     })
 
@@ -509,7 +508,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/stream?token=invalid-token')
 
       expect(res.status).toBe(401)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Invalid or expired token')
     })
   })
@@ -530,7 +529,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data.overall).toBe('healthy')
       expect(body.data.services.database.status).toBe('up')
@@ -543,7 +542,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.services.redis.status).toBe('down')
       expect(body.data.overall).toBe('critical')
     })
@@ -555,7 +554,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.services.worker.status).toBe('down')
       expect(body.data.overall).toBe('critical')
     })
@@ -566,7 +565,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.services.worker.status).toBe('unknown')
       expect(body.data.overall).toBe('degraded')
     })
@@ -580,7 +579,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.services.storage).toHaveLength(1)
       expect(body.data.services.storage[0].status).toBe('expiring')
       expect(body.data.overall).toBe('degraded')
@@ -595,7 +594,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.services.storage[0].status).toBe('expired')
     })
 
@@ -609,7 +608,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       // OAuth provider should show connected (auto-renew)
       expect(body.data.services.storage[0].status).toBe('connected')
     })
@@ -620,7 +619,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.data.services.redis.memoryUsed).toBe('256M')
     })
 
@@ -630,7 +629,7 @@ describe('dashboard routes', () => {
       const res = await app.request('/api/dashboard/health')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.error).toBe('Failed to check system health')
     })
   })

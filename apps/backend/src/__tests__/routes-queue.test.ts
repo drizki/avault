@@ -46,7 +46,7 @@ describe('queue routes', () => {
       const res = await app.request('/api/queue/status')
 
       expect(res.status).toBe(200)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(true)
       expect(body.data).toEqual(mockStats)
     })
@@ -57,7 +57,7 @@ describe('queue routes', () => {
       const res = await app.request('/api/queue/status')
 
       expect(res.status).toBe(500)
-      const body = await res.json() as ApiResponse
+      const body = (await res.json()) as ApiResponse
       expect(body.success).toBe(false)
       expect(body.error).toBe('Failed to get queue status')
       expect(body.details).toBe('Redis connection failed')

@@ -2,20 +2,20 @@
 # https://docs.coderabbit.ai/guides/configure-coderabbit
 
 language: en
-tone_instructions: "Be constructive and helpful. Focus on code quality, security, and best practices."
+tone_instructions: 'Be constructive and helpful. Focus on code quality, security, and best practices.'
 early_access: false
 enable_free_tier: true
 
 reviews:
   request_changes_workflow: true
   high_level_summary: true
-  high_level_summary_placeholder: "@coderabbitai summary"
+  high_level_summary_placeholder: '@coderabbitai summary'
   review_status: true
   poem: false
   collapse_walkthrough: false
   sequence_diagrams: true
   path_instructions:
-    - path: "apps/backend/**"
+    - path: 'apps/backend/**'
       instructions: |
         Review for:
         - Hono best practices
@@ -23,7 +23,7 @@ reviews:
         - Error handling
         - Security (SQL injection, XSS, auth)
         - Async/await patterns
-    - path: "apps/frontend/**"
+    - path: 'apps/frontend/**'
       instructions: |
         Review for:
         - React best practices
@@ -31,14 +31,14 @@ reviews:
         - State management
         - Accessibility (a11y)
         - Performance (memo, useCallback)
-    - path: "apps/worker/**"
+    - path: 'apps/worker/**'
       instructions: |
         Review for:
         - BullMQ patterns
         - Error handling and retries
         - Resource cleanup
         - Graceful shutdown
-    - path: "packages/shared/**"
+    - path: 'packages/shared/**'
       instructions: |
         Review for:
         - Type safety

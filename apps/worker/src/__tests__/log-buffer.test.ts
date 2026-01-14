@@ -175,7 +175,6 @@ describe('LogBuffer', () => {
       // Should have called createMany at least twice
       expect(mockDb.logEntry.createMany.mock.calls.length).toBeGreaterThanOrEqual(2)
     })
-
   })
 
   describe('log entry format', () => {

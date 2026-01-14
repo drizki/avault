@@ -36,7 +36,15 @@ interface DataTableProps<T> {
 type SortDirection = 'asc' | 'desc' | null
 
 function getNestedValue(obj: unknown, path: string): unknown {
-  return path.split('.').reduce((acc: unknown, part) => (acc && typeof acc === 'object' && part in acc) ? (acc as Record<string, unknown>)[part] : undefined, obj)
+  return path
+    .split('.')
+    .reduce(
+      (acc: unknown, part) =>
+        acc && typeof acc === 'object' && part in acc
+          ? (acc as Record<string, unknown>)[part]
+          : undefined,
+      obj
+    )
 }
 
 export function DataTable<T extends { id: string }>({
@@ -177,9 +185,7 @@ export function DataTable<T extends { id: string }>({
                   colSpan={columns.length + (actions ? 1 : 0)}
                   className="h-32 text-center"
                 >
-                  {emptyState || (
-                    <span className="text-muted-foreground">No results found</span>
-                  )}
+                  {emptyState || <span className="text-muted-foreground">No results found</span>}
                 </TableCell>
               </TableRow>
             ) : (
@@ -200,9 +206,7 @@ export function DataTable<T extends { id: string }>({
                     </TableCell>
                   ))}
                   {actions && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      {actions(item)}
-                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>{actions(item)}</TableCell>
                   )}
                 </TableRow>
               ))

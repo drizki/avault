@@ -54,7 +54,11 @@ export function HistoryChart() {
 
   // Custom tooltip
   const CustomTooltip = (_props: unknown) => {
-    const { active, payload, label } = _props as { active?: boolean; payload?: Array<{ color: string; name: string; value: number }>; label?: string }
+    const { active, payload, label } = _props as {
+      active?: boolean
+      payload?: Array<{ color: string; name: string; value: number }>
+      label?: string
+    }
     if (active && payload && payload.length) {
       return (
         <div className="bg-card border border-border p-2 text-xs">
@@ -109,10 +113,7 @@ export function HistoryChart() {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={data}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-            >
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorSuccess" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--status-success))" stopOpacity={0.3} />
@@ -123,11 +124,7 @@ export function HistoryChart() {
                   <stop offset="95%" stopColor="hsl(var(--status-error))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--border))"
-                vertical={false}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
               <XAxis
                 dataKey="date"
                 tickFormatter={formatDate}
@@ -143,10 +140,7 @@ export function HistoryChart() {
                 allowDecimals={false}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend
-                wrapperStyle={{ fontSize: '10px' }}
-                iconSize={8}
-              />
+              <Legend wrapperStyle={{ fontSize: '10px' }} iconSize={8} />
               <Area
                 type="monotone"
                 dataKey="success"

@@ -119,15 +119,25 @@ export function AlertsBanner() {
       <div
         className={cn(
           'flex items-center justify-between px-3 py-2 cursor-pointer',
-          criticalCount > 0 ? 'bg-status-error/10' : errorCount > 0 ? 'bg-status-error/5' : 'bg-status-warning/5'
+          criticalCount > 0
+            ? 'bg-status-error/10'
+            : errorCount > 0
+              ? 'bg-status-error/5'
+              : 'bg-status-warning/5'
         )}
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-3">
-          <AlertTriangle className={cn(
-            'h-4 w-4',
-            criticalCount > 0 ? 'text-status-error' : errorCount > 0 ? 'text-status-error' : 'text-status-warning'
-          )} />
+          <AlertTriangle
+            className={cn(
+              'h-4 w-4',
+              criticalCount > 0
+                ? 'text-status-error'
+                : errorCount > 0
+                  ? 'text-status-error'
+                  : 'text-status-warning'
+            )}
+          />
           <span className="text-sm font-medium">
             {visibleAlerts.length} Alert{visibleAlerts.length !== 1 ? 's' : ''}
           </span>
@@ -189,9 +199,7 @@ export function AlertsBanner() {
                       {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {alert.message}
-                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{alert.message}</p>
                 </div>
               </div>
               <Button

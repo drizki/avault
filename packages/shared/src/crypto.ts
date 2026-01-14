@@ -39,11 +39,7 @@ export function encrypt(data: string): EncryptedData {
  * Decrypt data using AES-256-GCM
  */
 export function decrypt(encryptedData: string, iv: string, authTag: string): string {
-  const decipher = crypto.createDecipheriv(
-    ALGORITHM,
-    KEY_BUFFER,
-    Buffer.from(iv, 'hex')
-  )
+  const decipher = crypto.createDecipheriv(ALGORITHM, KEY_BUFFER, Buffer.from(iv, 'hex'))
 
   decipher.setAuthTag(Buffer.from(authTag, 'hex'))
 

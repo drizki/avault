@@ -100,8 +100,18 @@ describe('S3Adapter', () => {
       const destinations = await adapter.listDestinations()
 
       expect(destinations).toEqual([
-        { id: 'bucket-1', name: 'bucket-1', provider: 's3', metadata: { creationDate: new Date('2024-01-01') } },
-        { id: 'bucket-2', name: 'bucket-2', provider: 's3', metadata: { creationDate: new Date('2024-02-01') } },
+        {
+          id: 'bucket-1',
+          name: 'bucket-1',
+          provider: 's3',
+          metadata: { creationDate: new Date('2024-01-01') },
+        },
+        {
+          id: 'bucket-2',
+          name: 'bucket-2',
+          provider: 's3',
+          metadata: { creationDate: new Date('2024-02-01') },
+        },
       ])
     })
 
@@ -116,17 +126,16 @@ describe('S3Adapter', () => {
     it('throws when adapter not initialized', async () => {
       const uninitializedAdapter = new S3Adapter()
 
-      await expect(uninitializedAdapter.listDestinations()).rejects.toThrow('Adapter not initialized')
+      await expect(uninitializedAdapter.listDestinations()).rejects.toThrow(
+        'Adapter not initialized'
+      )
     })
   })
 
   describe('listFolders', () => {
     it('lists folders in bucket root', async () => {
       mocks.send.mockResolvedValue({
-        CommonPrefixes: [
-          { Prefix: 'folder1/' },
-          { Prefix: 'folder2/' },
-        ],
+        CommonPrefixes: [{ Prefix: 'folder1/' }, { Prefix: 'folder2/' }],
       })
 
       const folders = await adapter.listFolders('my-bucket')
@@ -139,10 +148,7 @@ describe('S3Adapter', () => {
 
     it('lists folders with prefix', async () => {
       mocks.send.mockResolvedValue({
-        CommonPrefixes: [
-          { Prefix: 'parent/child1/' },
-          { Prefix: 'parent/child2/' },
-        ],
+        CommonPrefixes: [{ Prefix: 'parent/child1/' }, { Prefix: 'parent/child2/' }],
       })
 
       const folders = await adapter.listFolders('my-bucket', 'parent')
@@ -210,11 +216,13 @@ describe('S3Adapter', () => {
 
       // Capture the progress handler
       let progressHandler: ((progress: { loaded: number }) => void) | undefined
-      mocks.uploadOn.mockImplementation((event: string, handler: (progress: { loaded: number }) => void) => {
-        if (event === 'httpUploadProgress') {
-          progressHandler = handler
+      mocks.uploadOn.mockImplementation(
+        (event: string, handler: (progress: { loaded: number }) => void) => {
+          if (event === 'httpUploadProgress') {
+            progressHandler = handler
+          }
         }
-      })
+      )
 
       const mockStream = { pipe: vi.fn() }
       const onProgress = vi.fn()
@@ -281,10 +289,7 @@ describe('S3Adapter', () => {
     it('deletes all objects in folder', async () => {
       mocks.send
         .mockResolvedValueOnce({
-          Contents: [
-            { Key: 'folder/file1.txt' },
-            { Key: 'folder/file2.txt' },
-          ],
+          Contents: [{ Key: 'folder/file1.txt' }, { Key: 'folder/file2.txt' }],
         })
         .mockResolvedValueOnce({})
 
@@ -314,8 +319,16 @@ describe('S3Adapter', () => {
       const backups = await adapter.listBackups('my-bucket', 'backups')
 
       expect(backups).toEqual([
-        { name: 'backup-2024-01-01', path: 'backups/backup-2024-01-01/', createdTime: expect.any(Date) },
-        { name: 'backup-2024-01-02', path: 'backups/backup-2024-01-02/', createdTime: expect.any(Date) },
+        {
+          name: 'backup-2024-01-01',
+          path: 'backups/backup-2024-01-01/',
+          createdTime: expect.any(Date),
+        },
+        {
+          name: 'backup-2024-01-02',
+          path: 'backups/backup-2024-01-02/',
+          createdTime: expect.any(Date),
+        },
       ])
     })
   })

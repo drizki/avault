@@ -20,7 +20,8 @@ export class BackupScheduler {
     private redis: Redis,
     checkInterval?: number
   ) {
-    this.checkInterval = checkInterval || parseInt(process.env.SCHEDULER_CHECK_INTERVAL || '60000', 10)
+    this.checkInterval =
+      checkInterval || parseInt(process.env.SCHEDULER_CHECK_INTERVAL || '60000', 10)
     this.lockTTL = parseInt(process.env.SCHEDULER_LOCK_TTL || '60000', 10)
   }
 
@@ -99,7 +100,10 @@ export class BackupScheduler {
         await this.processJob(job)
       }
     } catch (error: unknown) {
-      logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error in scheduler tick')
+      logger.error(
+        { error: error instanceof Error ? error.message : String(error) },
+        'Error in scheduler tick'
+      )
     } finally {
       this.isRunning = false
     }
@@ -192,7 +196,11 @@ export class BackupScheduler {
         }
       } catch (error: unknown) {
         logger.error(
-          { jobId: job.id, error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined },
+          {
+            jobId: job.id,
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          },
           'Failed to process scheduled job'
         )
         throw error // Re-throw to ensure lock is released
@@ -226,10 +234,7 @@ export class BackupScheduler {
         },
       })
 
-      logger.info(
-        { jobsToRecalculate: jobs.length },
-        'Recalculating schedules for jobs'
-      )
+      logger.info({ jobsToRecalculate: jobs.length }, 'Recalculating schedules for jobs')
 
       let recalculatedCount = 0
       for (const job of jobs) {
@@ -253,7 +258,10 @@ export class BackupScheduler {
 
       logger.info({ recalculatedCount }, 'Recalculated schedules for all jobs')
     } catch (error: unknown) {
-      logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error recalculating schedules')
+      logger.error(
+        { error: error instanceof Error ? error.message : String(error) },
+        'Error recalculating schedules'
+      )
     }
   }
 }
@@ -263,10 +271,7 @@ let schedulerInstance: BackupScheduler | null = null
 
 export function initScheduler(db: PrismaClient, redis: Redis): BackupScheduler {
   if (!schedulerInstance) {
-    const checkInterval = parseInt(
-      process.env.SCHEDULER_CHECK_INTERVAL || '60000',
-      10
-    )
+    const checkInterval = parseInt(process.env.SCHEDULER_CHECK_INTERVAL || '60000', 10)
     schedulerInstance = new BackupScheduler(db, redis, checkInterval)
   }
   return schedulerInstance

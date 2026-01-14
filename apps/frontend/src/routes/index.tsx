@@ -181,8 +181,10 @@ function Dashboard() {
 
   function copyLogs() {
     const logText = logs
-      .filter(log => log.timestamp && log.level && log.message)
-      .map(log => `${formatLogTimestamp(log.timestamp)} [${log.level.toUpperCase()}] ${log.message}`)
+      .filter((log) => log.timestamp && log.level && log.message)
+      .map(
+        (log) => `${formatLogTimestamp(log.timestamp)} [${log.level.toUpperCase()}] ${log.message}`
+      )
       .join('\n')
     navigator.clipboard.writeText(logText)
     toast({
@@ -260,8 +262,8 @@ function Dashboard() {
                   (stats?.history.successRate ?? 100) >= 95
                     ? 'success'
                     : (stats?.history.successRate ?? 100) >= 80
-                    ? 'warning'
-                    : 'error'
+                      ? 'warning'
+                      : 'error'
                 }
                 loading={isLoadingStats}
               />
@@ -333,7 +335,10 @@ function Dashboard() {
                       )}
                     </Button>
                     {isLogsConnected ? (
-                      <Badge variant="outline" className="bg-status-success/20 text-status-success h-5 text-[10px]">
+                      <Badge
+                        variant="outline"
+                        className="bg-status-success/20 text-status-success h-5 text-[10px]"
+                      >
                         Live
                       </Badge>
                     ) : (
@@ -359,19 +364,21 @@ function Dashboard() {
                     </div>
                   ) : (
                     <div className="space-y-0.5">
-                      {logs.filter(log => log.timestamp && log.level && log.message).map((log, index) => (
-                        <div key={index} className="flex gap-2 leading-tight">
-                          <span className="text-muted-foreground shrink-0">
-                            {formatLogTimestamp(log.timestamp)}
-                          </span>
-                          <span className={`uppercase font-bold shrink-0 w-10 ${getLevelColor(log.level)}`}>
-                            {log.level}
-                          </span>
-                          <span className="text-foreground break-all">
-                            {log.message}
-                          </span>
-                        </div>
-                      ))}
+                      {logs
+                        .filter((log) => log.timestamp && log.level && log.message)
+                        .map((log, index) => (
+                          <div key={index} className="flex gap-2 leading-tight">
+                            <span className="text-muted-foreground shrink-0">
+                              {formatLogTimestamp(log.timestamp)}
+                            </span>
+                            <span
+                              className={`uppercase font-bold shrink-0 w-10 ${getLevelColor(log.level)}`}
+                            >
+                              {log.level}
+                            </span>
+                            <span className="text-foreground break-all">{log.message}</span>
+                          </div>
+                        ))}
                       <div ref={logsEndRef} />
                     </div>
                   )}

@@ -134,7 +134,7 @@ export async function findQueueJobByHistoryId(historyId: string) {
 export async function getActiveJobs() {
   try {
     const jobs = await backupQueue.getActive()
-    return jobs.map(job => ({
+    return jobs.map((job) => ({
       queueJobId: job.id,
       jobId: job.data.jobId,
       historyId: job.data.historyId,
@@ -160,7 +160,10 @@ export async function cleanupStuckJobs(maxAgeMinutes: number = 60) {
       const jobAge = now - job.timestamp
       if (jobAge > maxAge) {
         await job.moveToFailed(new Error('Job stuck - cleaned up automatically'), 'stuck')
-        logger.warn({ queueJobId: job.id, jobId: job.data.jobId, ageMinutes: Math.round(jobAge / 60000) }, 'Stuck job cleaned up')
+        logger.warn(
+          { queueJobId: job.id, jobId: job.data.jobId, ageMinutes: Math.round(jobAge / 60000) },
+          'Stuck job cleaned up'
+        )
         cleanedCount++
       }
     }

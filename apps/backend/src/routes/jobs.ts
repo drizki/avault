@@ -1,9 +1,21 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { CreateBackupJobSchema, UpdateBackupJobSchema, BackupStatus, TriggerSource, logger } from '@avault/shared'
+import {
+  CreateBackupJobSchema,
+  UpdateBackupJobSchema,
+  BackupStatus,
+  TriggerSource,
+  logger,
+} from '@avault/shared'
 import { requireAuth } from '../middleware/auth'
 import type { Env } from '../index'
-import { queueBackupJob, findQueueJobByHistoryId, cancelQueueJob, cleanupStuckJobs, getActiveJobs } from '../lib/queue'
+import {
+  queueBackupJob,
+  findQueueJobByHistoryId,
+  cancelQueueJob,
+  cleanupStuckJobs,
+  getActiveJobs,
+} from '../lib/queue'
 import { systemLog } from '../lib/log-stream'
 import { getNextRunTime } from '../lib/scheduler/cron-utils'
 
@@ -55,11 +67,14 @@ jobs.get('/queue/active', async (c) => {
     const activeJobs = await getActiveJobs()
     return c.json({ success: true, data: activeJobs })
   } catch (error: unknown) {
-    return c.json({
-      success: false,
-      error: 'Failed to get active jobs',
-      details: error instanceof Error ? error.message : String(error),
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to get active jobs',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
@@ -75,11 +90,14 @@ jobs.post('/queue/cleanup', async (c) => {
       message: `Cleaned up ${result.cleanedCount} stuck jobs out of ${result.checkedCount} active jobs`,
     })
   } catch (error: unknown) {
-    return c.json({
-      success: false,
-      error: 'Failed to cleanup stuck jobs',
-      details: error instanceof Error ? error.message : String(error),
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to cleanup stuck jobs',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
@@ -101,18 +119,28 @@ jobs.post('/history/:historyId/cancel', async (c) => {
     })
 
     if (!history) {
-      return c.json({
-        success: false,
-        error: 'History entry not found',
-      }, 404)
+      return c.json(
+        {
+          success: false,
+          error: 'History entry not found',
+        },
+        404
+      )
     }
 
     // Check if job is in a cancellable state
-    if (history.status === 'SUCCESS' || history.status === 'FAILED' || history.status === 'CANCELLED') {
-      return c.json({
-        success: false,
-        error: `Job already ${history.status.toLowerCase()}`,
-      }, 400)
+    if (
+      history.status === 'SUCCESS' ||
+      history.status === 'FAILED' ||
+      history.status === 'CANCELLED'
+    ) {
+      return c.json(
+        {
+          success: false,
+          error: `Job already ${history.status.toLowerCase()}`,
+        },
+        400
+      )
     }
 
     // Find the job in the queue by historyId
@@ -144,12 +172,18 @@ jobs.post('/history/:historyId/cancel', async (c) => {
       message: 'Job cancelled',
     })
   } catch (error: unknown) {
-    logger.error({ error: error instanceof Error ? error.message : String(error), historyId }, 'Failed to cancel job')
-    return c.json({
-      success: false,
-      error: 'Failed to cancel job',
-      details: error instanceof Error ? error.message : String(error),
-    }, 500)
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error), historyId },
+      'Failed to cancel job'
+    )
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to cancel job',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500
+    )
   }
 })
 
@@ -180,20 +214,26 @@ jobs.post('/', zValidator('json', CreateBackupJobSchema), async (c) => {
       },
     })
 
-    logger.info({
-      jobId: job.id,
-      schedule: job.schedule,
-      nextRunAt: job.nextRunAt,
-      enabled: job.enabled,
-    }, 'Backup job created with schedule')
+    logger.info(
+      {
+        jobId: job.id,
+        schedule: job.schedule,
+        nextRunAt: job.nextRunAt,
+        enabled: job.enabled,
+      },
+      'Backup job created with schedule'
+    )
 
     return c.json({ success: true, data: job }, 201)
   } catch (error: unknown) {
-    return c.json({
-      success: false,
-      error: 'Failed to create backup job',
-      details: error instanceof Error ? error.message : String(error),
-    }, 400)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to create backup job',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      400
+    )
   }
 })
 
@@ -238,10 +278,13 @@ jobs.patch('/:id', zValidator('json', UpdateBackupJobSchema), async (c) => {
     })
 
     if (!existing) {
-      return c.json({
-        success: false,
-        error: 'Job not found',
-      }, 404)
+      return c.json(
+        {
+          success: false,
+          error: 'Job not found',
+        },
+        404
+      )
     }
 
     // Recalculate nextRunAt if schedule or enabled status changed
@@ -266,19 +309,25 @@ jobs.patch('/:id', zValidator('json', UpdateBackupJobSchema), async (c) => {
       },
     })
 
-    logger.info({
-      jobId: job.id,
-      scheduleChanged: !!data.schedule,
-      enabledChanged: data.enabled !== undefined,
-      nextRunAt: job.nextRunAt,
-    }, 'Backup job updated')
+    logger.info(
+      {
+        jobId: job.id,
+        scheduleChanged: !!data.schedule,
+        enabledChanged: data.enabled !== undefined,
+        nextRunAt: job.nextRunAt,
+      },
+      'Backup job updated'
+    )
 
     return c.json({ success: true, data: job })
   } catch {
-    return c.json({
-      success: false,
-      error: 'Failed to update job',
-    }, 400)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to update job',
+      },
+      400
+    )
   }
 })
 
@@ -296,10 +345,13 @@ jobs.delete('/:id', async (c) => {
     })
 
     if (!existing) {
-      return c.json({
-        success: false,
-        error: 'Job not found',
-      }, 404)
+      return c.json(
+        {
+          success: false,
+          error: 'Job not found',
+        },
+        404
+      )
     }
 
     await db.backupJob.delete({ where: { id } })
@@ -309,10 +361,13 @@ jobs.delete('/:id', async (c) => {
       message: 'Job deleted successfully',
     })
   } catch {
-    return c.json({
-      success: false,
-      error: 'Failed to delete job',
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to delete job',
+      },
+      500
+    )
   }
 })
 
@@ -334,10 +389,13 @@ jobs.post('/:id/run', async (c) => {
     })
 
     if (!job) {
-      return c.json({
-        success: false,
-        error: 'Job not found',
-      }, 404)
+      return c.json(
+        {
+          success: false,
+          error: 'Job not found',
+        },
+        404
+      )
     }
 
     // Create a backup history entry
@@ -386,11 +444,14 @@ jobs.post('/:id/run', async (c) => {
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error)
     logger.error({ error: errMsg, jobId: id }, 'Failed to queue job')
-    return c.json({
-      success: false,
-      error: 'Failed to queue job',
-      details: errMsg,
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to queue job',
+        details: errMsg,
+      },
+      500
+    )
   }
 })
 
@@ -407,10 +468,13 @@ jobs.get('/:id/history', async (c) => {
   })
 
   if (!job) {
-    return c.json({
-      success: false,
-      error: 'Job not found',
-    }, 404)
+    return c.json(
+      {
+        success: false,
+        error: 'Job not found',
+      },
+      404
+    )
   }
 
   const history = await db.backupHistory.findMany({

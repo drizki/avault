@@ -19,7 +19,10 @@ export class SettingsService {
       return JSON.parse(setting.value) as T
     } catch (error) {
       // Log corrupted setting data instead of silently ignoring
-      logger.warn({ key, value: setting.value, error }, 'Failed to parse setting value, using default')
+      logger.warn(
+        { key, value: setting.value, error },
+        'Failed to parse setting value, using default'
+      )
       return defaultValue
     }
   }

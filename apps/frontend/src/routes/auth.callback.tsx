@@ -37,7 +37,9 @@ function AuthCallback() {
         navigate({ to: '/' })
       } catch (error: unknown) {
         setStatus('error')
-        setErrorMessage(error instanceof Error ? error.message : String(error) || 'Authentication failed')
+        setErrorMessage(
+          error instanceof Error ? error.message : String(error) || 'Authentication failed'
+        )
 
         // Redirect to login after error
         setTimeout(() => {
@@ -78,13 +80,9 @@ function AuthCallback() {
             <div className="flex items-center justify-center w-10 h-10 mx-auto bg-destructive/10 border border-destructive/20">
               <AlertCircle className="w-5 h-5 text-destructive" />
             </div>
-            <p className="text-[13px] text-foreground font-medium">
-              Authentication Failed
-            </p>
+            <p className="text-[13px] text-foreground font-medium">Authentication Failed</p>
             <p className="text-[12px] text-muted-foreground">{errorMessage}</p>
-            <p className="text-[11px] text-muted-foreground/60">
-              Redirecting to login...
-            </p>
+            <p className="text-[11px] text-muted-foreground/60">Redirecting to login...</p>
           </div>
         )}
       </div>

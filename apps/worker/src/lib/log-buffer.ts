@@ -86,10 +86,7 @@ export class LogBuffer {
       if (this.buffer.length < this.maxBufferSize * 2) {
         this.buffer.unshift(...toFlush)
       } else {
-        logger.warn(
-          { droppedLogs: toFlush.length },
-          'Buffer overflow - dropping logs'
-        )
+        logger.warn({ droppedLogs: toFlush.length }, 'Buffer overflow - dropping logs')
       }
     } finally {
       this.isFlushing = false
@@ -102,7 +99,10 @@ export class LogBuffer {
   private startFlushTimer(): void {
     this.flushInterval = setInterval(() => {
       this.flush().catch((err) => {
-        logger.error({ error: err instanceof Error ? err.message : String(err) }, 'Error in log buffer flush timer')
+        logger.error(
+          { error: err instanceof Error ? err.message : String(err) },
+          'Error in log buffer flush timer'
+        )
       })
     }, this.flushIntervalMs)
   }

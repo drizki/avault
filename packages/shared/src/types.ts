@@ -27,7 +27,13 @@ export interface LoginResponse {
 // ============================================================================
 
 export interface StorageProviderConfig {
-  provider: 'google_drive_shared' | 'google_drive_my_drive' | 'google_cloud_storage' | 's3' | 'cloudflare_r2' | 'digitalocean_spaces'
+  provider:
+    | 'google_drive_shared'
+    | 'google_drive_my_drive'
+    | 'google_cloud_storage'
+    | 's3'
+    | 'cloudflare_r2'
+    | 'digitalocean_spaces'
   name: string
   icon: string
   authType: 'oauth' | 'api_key' | 'service_account'

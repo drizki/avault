@@ -8,10 +8,7 @@ interface ApiResponse<T> {
 class ApiClient {
   private baseUrl = '/api'
 
-  async request<T>(
-    endpoint: string,
-    options?: RequestInit
-  ): Promise<ApiResponse<T>> {
+  async request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,

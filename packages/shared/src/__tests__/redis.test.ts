@@ -8,7 +8,13 @@ vi.mock('ioredis', () => ({
   })),
 }))
 
-import { getRedis, createRedisConnection, getRedisSubscriber, closeRedisConnections, Redis } from '../redis'
+import {
+  getRedis,
+  createRedisConnection,
+  getRedisSubscriber,
+  closeRedisConnections,
+  Redis,
+} from '../redis'
 
 describe('redis module', () => {
   describe('getRedis', () => {

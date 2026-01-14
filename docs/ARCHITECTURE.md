@@ -95,48 +95,48 @@ Avault is a self-hosted tool that automatically backs up your NAS to cloud stora
 
 ### Backend (apps/backend)
 
-| Technology | Purpose |
-|------------|---------|
-| **Hono** | Lightweight, fast web framework with excellent TypeScript support |
-| **@hono/node-server** | Node.js adapter for Hono |
-| **@hono/zod-validator** | Request validation with Zod schemas |
-| **Prisma** | Type-safe ORM with SQLite database |
-| **BullMQ** | Redis-based job queue (queue management in backend) |
-| **node-cron** | Cron-based job scheduling |
-| **googleapis** | Official Google Drive API client |
-| **ioredis** | Redis client for Node.js |
+| Technology              | Purpose                                                           |
+| ----------------------- | ----------------------------------------------------------------- |
+| **Hono**                | Lightweight, fast web framework with excellent TypeScript support |
+| **@hono/node-server**   | Node.js adapter for Hono                                          |
+| **@hono/zod-validator** | Request validation with Zod schemas                               |
+| **Prisma**              | Type-safe ORM with SQLite database                                |
+| **BullMQ**              | Redis-based job queue (queue management in backend)               |
+| **node-cron**           | Cron-based job scheduling                                         |
+| **googleapis**          | Official Google Drive API client                                  |
+| **ioredis**             | Redis client for Node.js                                          |
 
 ### Worker (apps/worker)
 
-| Technology | Purpose |
-|------------|---------|
-| **BullMQ** | Job processor with concurrency control |
-| **Prisma** | Database access for status updates |
-| **googleapis** | Google Drive file operations |
-| **ioredis** | Redis connection for BullMQ |
-| **Node.js Streams** | Memory-efficient file uploads |
+| Technology          | Purpose                                |
+| ------------------- | -------------------------------------- |
+| **BullMQ**          | Job processor with concurrency control |
+| **Prisma**          | Database access for status updates     |
+| **googleapis**      | Google Drive file operations           |
+| **ioredis**         | Redis connection for BullMQ            |
+| **Node.js Streams** | Memory-efficient file uploads          |
 
 ### Frontend (apps/frontend)
 
-| Technology | Purpose |
-|------------|---------|
-| **React 19** | UI library with latest features (use hook, etc.) |
-| **Vite** | Fast build tool and dev server |
-| **TanStack Router** | Type-safe routing with file-based routing |
-| **shadcn/ui** | Accessible, customizable UI components |
-| **Radix UI** | Headless UI primitives (via shadcn/ui) |
-| **Tailwind CSS** | Utility-first styling |
-| **Lucide React** | Icon library |
-| **Geist Mono** | Monospace font for headings/decorative text |
-| **Inter** | Sans-serif font for body/UI text |
+| Technology          | Purpose                                          |
+| ------------------- | ------------------------------------------------ |
+| **React 19**        | UI library with latest features (use hook, etc.) |
+| **Vite**            | Fast build tool and dev server                   |
+| **TanStack Router** | Type-safe routing with file-based routing        |
+| **shadcn/ui**       | Accessible, customizable UI components           |
+| **Radix UI**        | Headless UI primitives (via shadcn/ui)           |
+| **Tailwind CSS**    | Utility-first styling                            |
+| **Lucide React**    | Icon library                                     |
+| **Geist Mono**      | Monospace font for headings/decorative text      |
+| **Inter**           | Sans-serif font for body/UI text                 |
 
 ### Shared (packages/shared)
 
-| Technology | Purpose |
-|------------|---------|
-| **Prisma** | Database schema and client generator |
-| **Zod** | Runtime validation schemas |
-| **TypeScript** | Shared types and interfaces |
+| Technology     | Purpose                              |
+| -------------- | ------------------------------------ |
+| **Prisma**     | Database schema and client generator |
+| **Zod**        | Runtime validation schemas           |
+| **TypeScript** | Shared types and interfaces          |
 
 ---
 
@@ -169,6 +169,7 @@ interface IStorageAdapter {
 ```
 
 **Implementations:**
+
 - `GoogleDriveAdapter` - For Google Workspace Shared Drives
 - `S3Adapter` - For S3-compatible storage (coming soon)
 - `DropboxAdapter` - For Dropbox (coming soon)
@@ -176,6 +177,7 @@ interface IStorageAdapter {
 ### 3. Job Queue Pattern
 
 **Why BullMQ?**
+
 - Reliable: Redis-backed persistent queue
 - Retries: Exponential backoff on failures
 - Concurrency: Process N jobs simultaneously
@@ -183,6 +185,7 @@ interface IStorageAdapter {
 - Scalability: Add more workers horizontally
 
 **Job Flow:**
+
 1. User creates/schedules backup job in UI
 2. Backend validates and stores job in database
 3. node-cron triggers job at scheduled time (or manual trigger)
@@ -213,11 +216,12 @@ await storageAdapter.uploadFile({
   fileSize,
   onProgress: (progress) => {
     // Report progress
-  }
+  },
 })
 ```
 
 Benefits:
+
 - Handles files larger than available RAM
 - Immediate upload start (no buffering delay)
 - Progress tracking during upload
@@ -404,12 +408,7 @@ function createStorageAdapter(provider: string): StorageAdapter {
 ```typescript
 import crypto from 'crypto'
 
-function decryptCredentials(
-  encryptedData: string,
-  iv: string,
-  authTag: string,
-  key: Buffer
-): any {
+function decryptCredentials(encryptedData: string, iv: string, authTag: string, key: Buffer): any {
   const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'hex'))
   decipher.setAuthTag(Buffer.from(authTag, 'hex'))
 
@@ -470,7 +469,7 @@ for (const file of files) {
     onProgress: (progress) => {
       // Update history bytesUploaded
       // Emit WebSocket event to frontend
-    }
+    },
   })
 
   // Update history: filesUploaded++
@@ -511,12 +510,14 @@ for (const file of files) {
 **Algorithm**: AES-256-GCM (authenticated encryption)
 
 **Storage**:
+
 ```
 encryptedData = encrypt(JSON.stringify(credentials), key, iv)
 authTag = GCM authentication tag
 ```
 
 **Key Management**:
+
 - **ENCRYPTION_KEY**: 32-byte (256-bit) key from environment variable
 - Generate with: `openssl rand -hex 32`
 - **Critical**: Back up this key securely (password manager, encrypted USB)
@@ -532,6 +533,7 @@ authTag = GCM authentication tag
 6. **Refresh**: Automatically refresh `access_token` when expired
 
 **Scopes**:
+
 - Recommended: `https://www.googleapis.com/auth/drive.file` (only files created by app)
 - Alternative: `https://www.googleapis.com/auth/drive` (full access - use cautiously)
 
@@ -564,6 +566,7 @@ authTag = GCM authentication tag
 Initialize Google OAuth flow.
 
 **Request**:
+
 ```json
 {
   "name": "My Google Drive Account"
@@ -571,6 +574,7 @@ Initialize Google OAuth flow.
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -586,6 +590,7 @@ Initialize Google OAuth flow.
 OAuth callback endpoint (handles redirect from Google).
 
 **Query Params**:
+
 - `code`: Authorization code
 - `state`: State token
 
@@ -598,6 +603,7 @@ OAuth callback endpoint (handles redirect from Google).
 List all stored credentials (without sensitive data).
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -628,6 +634,7 @@ List all configured storage destinations.
 Create a new destination.
 
 **Request**:
+
 ```json
 {
   "credentialId": "clx123...",
@@ -649,6 +656,7 @@ List all backup jobs.
 Create a new backup job.
 
 **Request**:
+
 ```json
 {
   "name": "Daily Photos Backup",
@@ -675,6 +683,7 @@ Trigger immediate job execution (bypasses schedule).
 Get paginated backup execution history.
 
 **Query Params**:
+
 - `jobId`: Filter by job ID (optional)
 - `status`: Filter by status (optional)
 - `limit`: Results per page (default: 20, max: 100)
@@ -687,6 +696,7 @@ Get paginated backup execution history.
 Browse NAS filesystem.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -813,11 +823,11 @@ Avault uses a multi-container Docker architecture with pre-built images:
 
 Pre-built multi-platform images (amd64, arm64) are published to GitHub Container Registry:
 
-| Image | Base | Purpose |
-|-------|------|---------|
-| `ghcr.io/drizki/avault-backend` | node:20-alpine | Hono API server |
-| `ghcr.io/drizki/avault-frontend` | nginx:alpine | Static SPA with API proxy |
-| `ghcr.io/drizki/avault-worker` | node:20-alpine | BullMQ job processor |
+| Image                            | Base           | Purpose                   |
+| -------------------------------- | -------------- | ------------------------- |
+| `ghcr.io/drizki/avault-backend`  | node:20-alpine | Hono API server           |
+| `ghcr.io/drizki/avault-frontend` | nginx:alpine   | Static SPA with API proxy |
+| `ghcr.io/drizki/avault-worker`   | node:20-alpine | BullMQ job processor      |
 
 ### Multi-Stage Dockerfile Structure
 
@@ -829,6 +839,7 @@ Each Dockerfile uses a 4-stage build process:
 4. **runner**: Minimal production image with non-root user
 
 Example build sizes:
+
 - Backend: ~200MB
 - Frontend: ~30MB (nginx + static files)
 - Worker: ~200MB
@@ -836,6 +847,7 @@ Example build sizes:
 ### Production Deployment
 
 1. Clone repository and configure environment:
+
    ```bash
    git clone https://github.com/drizki/avault.git
    cd avault
@@ -844,6 +856,7 @@ Example build sizes:
    ```
 
 2. Start all services:
+
    ```bash
    docker compose up -d
    ```
@@ -858,27 +871,27 @@ Example build sizes:
 
 All services share environment configuration via `.env` file:
 
-| Variable | Service | Description |
-|----------|---------|-------------|
-| `AVAULT_VERSION` | All | Docker image tag (default: latest) |
-| `POSTGRES_USER` | PostgreSQL | Database username |
-| `POSTGRES_PASSWORD` | PostgreSQL | Database password (required) |
-| `POSTGRES_DB` | PostgreSQL | Database name |
-| `REDIS_PASSWORD` | Redis | Redis password (optional) |
-| `ENCRYPTION_KEY` | Backend, Worker | AES-256 key for credentials |
-| `JWT_SECRET` | Backend | JWT signing secret |
-| `GOOGLE_CLIENT_ID` | Backend, Worker | OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Backend, Worker | OAuth client secret |
-| `NAS_MOUNT_PATH` | Worker | Host path to NAS mount |
-| `WORKER_CONCURRENCY` | Worker | Parallel job count |
+| Variable               | Service         | Description                        |
+| ---------------------- | --------------- | ---------------------------------- |
+| `AVAULT_VERSION`       | All             | Docker image tag (default: latest) |
+| `POSTGRES_USER`        | PostgreSQL      | Database username                  |
+| `POSTGRES_PASSWORD`    | PostgreSQL      | Database password (required)       |
+| `POSTGRES_DB`          | PostgreSQL      | Database name                      |
+| `REDIS_PASSWORD`       | Redis           | Redis password (optional)          |
+| `ENCRYPTION_KEY`       | Backend, Worker | AES-256 key for credentials        |
+| `JWT_SECRET`           | Backend         | JWT signing secret                 |
+| `GOOGLE_CLIENT_ID`     | Backend, Worker | OAuth client ID                    |
+| `GOOGLE_CLIENT_SECRET` | Backend, Worker | OAuth client secret                |
+| `NAS_MOUNT_PATH`       | Worker          | Host path to NAS mount             |
+| `WORKER_CONCURRENCY`   | Worker          | Parallel job count                 |
 
 ### Volume Mounts
 
-| Volume | Container Path | Purpose |
-|--------|---------------|---------|
-| `postgres-data` | `/var/lib/postgresql/data` | Database persistence |
-| `redis-data` | `/data` | Redis AOF persistence |
-| `${NAS_MOUNT_PATH}` | `/nas:ro` | NAS read-only access |
+| Volume              | Container Path             | Purpose               |
+| ------------------- | -------------------------- | --------------------- |
+| `postgres-data`     | `/var/lib/postgresql/data` | Database persistence  |
+| `redis-data`        | `/data`                    | Redis AOF persistence |
+| `${NAS_MOUNT_PATH}` | `/nas:ro`                  | NAS read-only access  |
 
 ### Health Checks
 
@@ -943,6 +956,7 @@ pnpm dev  # Runs all apps locally via Turbo
 ### 4. Rate Limiting
 
 Google Drive API quotas:
+
 - **Queries per day**: 1,000,000,000 (unlikely to hit)
 - **Queries per 100 seconds per user**: 1,000
 - **Recommendation**: Add exponential backoff on 429 errors
@@ -988,6 +1002,7 @@ Triggered on semantic version tags (`v*.*.*`):
 3. Extract changelog and create GitHub Release
 
 Image tagging strategy:
+
 - `1.2.3` - Exact version
 - `1.2` - Minor version (latest patch)
 - `1` - Major version (latest minor)
@@ -1008,12 +1023,14 @@ The project follows [Semantic Versioning](https://semver.org/):
 ### Release Process
 
 1. Create release branch from develop:
+
    ```bash
    git checkout develop
    git checkout -b release/v1.2.0
    ```
 
 2. Bump version:
+
    ```bash
    ./scripts/bump-version.sh minor
    ```
@@ -1021,6 +1038,7 @@ The project follows [Semantic Versioning](https://semver.org/):
 3. Update CHANGELOG.md with release notes
 
 4. Merge to main and tag:
+
    ```bash
    git checkout main
    git merge release/v1.2.0

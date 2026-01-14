@@ -53,7 +53,9 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
   const [deleteCredential, setDeleteCredential] = useState<Credential | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isCredentialFormOpen, setIsCredentialFormOpen] = useState(false)
-  const [selectedCredentialProvider, setSelectedCredentialProvider] = useState<StorageProvider | undefined>()
+  const [selectedCredentialProvider, setSelectedCredentialProvider] = useState<
+    StorageProvider | undefined
+  >()
 
   async function fetchHealth() {
     try {
@@ -96,7 +98,8 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
   }
 
   // Use live worker status if available
-  const workerStatus = liveWorkerStatus !== 'unknown' ? liveWorkerStatus : health?.services.worker.status
+  const workerStatus =
+    liveWorkerStatus !== 'unknown' ? liveWorkerStatus : health?.services.worker.status
 
   const getStatusIcon = (status: string | undefined) => {
     switch (status) {
@@ -133,13 +136,27 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
   const getOverallBadge = (overall: string | undefined) => {
     switch (overall) {
       case 'healthy':
-        return <Badge className="bg-status-success/20 text-status-success h-5 text-[10px]">Healthy</Badge>
+        return (
+          <Badge className="bg-status-success/20 text-status-success h-5 text-[10px]">
+            Healthy
+          </Badge>
+        )
       case 'degraded':
-        return <Badge className="bg-status-warning/20 text-status-warning h-5 text-[10px]">Degraded</Badge>
+        return (
+          <Badge className="bg-status-warning/20 text-status-warning h-5 text-[10px]">
+            Degraded
+          </Badge>
+        )
       case 'critical':
-        return <Badge className="bg-status-error/20 text-status-error h-5 text-[10px]">Critical</Badge>
+        return (
+          <Badge className="bg-status-error/20 text-status-error h-5 text-[10px]">Critical</Badge>
+        )
       default:
-        return <Badge variant="secondary" className="h-5 text-[10px]">Unknown</Badge>
+        return (
+          <Badge variant="secondary" className="h-5 text-[10px]">
+            Unknown
+          </Badge>
+        )
     }
   }
 
@@ -164,9 +181,7 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
   return (
     <>
       <Panel className="flex flex-col h-full">
-        <PanelHeader
-          actions={health ? getOverallBadge(health.overall) : null}
-        >
+        <PanelHeader actions={health ? getOverallBadge(health.overall) : null}>
           <PanelTitle className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-muted-foreground" />
             System Health
@@ -189,7 +204,12 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(health?.services.database.status)}
-                  <span className={cn('text-xs font-mono', getStatusColor(health?.services.database.status))}>
+                  <span
+                    className={cn(
+                      'text-xs font-mono',
+                      getStatusColor(health?.services.database.status)
+                    )}
+                  >
                     {health?.services.database.latencyMs}ms
                   </span>
                 </div>
@@ -203,7 +223,12 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(health?.services.redis.status)}
-                  <span className={cn('text-xs font-mono', getStatusColor(health?.services.redis.status))}>
+                  <span
+                    className={cn(
+                      'text-xs font-mono',
+                      getStatusColor(health?.services.redis.status)
+                    )}
+                  >
                     {health?.services.redis.latencyMs}ms
                   </span>
                   {health?.services.redis.memoryUsed && (
@@ -225,11 +250,12 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
                   <span className={cn('text-xs capitalize', getStatusColor(workerStatus))}>
                     {workerStatus || 'unknown'}
                   </span>
-                  {health?.services.worker.activeJobs !== undefined && health.services.worker.activeJobs > 0 && (
-                    <Badge variant="secondary" className="h-4 text-[9px]">
-                      {health.services.worker.activeJobs} active
-                    </Badge>
-                  )}
+                  {health?.services.worker.activeJobs !== undefined &&
+                    health.services.worker.activeJobs > 0 && (
+                      <Badge variant="secondary" className="h-4 text-[9px]">
+                        {health.services.worker.activeJobs} active
+                      </Badge>
+                    )}
                 </div>
               </div>
 
@@ -246,28 +272,66 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleAddCredential('google_drive_shared')} className="cursor-pointer text-xs">
-                      <img src="/icons/google_drive.svg" alt="Google Drive" className="w-4 h-4 mr-2" />
+                    <DropdownMenuItem
+                      onClick={() => handleAddCredential('google_drive_shared')}
+                      className="cursor-pointer text-xs"
+                    >
+                      <img
+                        src="/icons/google_drive.svg"
+                        alt="Google Drive"
+                        className="w-4 h-4 mr-2"
+                      />
                       Google Drive (Shared)
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAddCredential('google_drive_my_drive')} className="cursor-pointer text-xs">
-                      <img src="/icons/google_drive.svg" alt="Google Drive" className="w-4 h-4 mr-2" />
+                    <DropdownMenuItem
+                      onClick={() => handleAddCredential('google_drive_my_drive')}
+                      className="cursor-pointer text-xs"
+                    >
+                      <img
+                        src="/icons/google_drive.svg"
+                        alt="Google Drive"
+                        className="w-4 h-4 mr-2"
+                      />
                       Google Drive (My Drive)
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAddCredential('google_cloud_storage')} className="cursor-pointer text-xs">
-                      <img src="/icons/google_cloud_storage.svg" alt="Google Cloud Storage" className="w-4 h-4 mr-2" />
+                    <DropdownMenuItem
+                      onClick={() => handleAddCredential('google_cloud_storage')}
+                      className="cursor-pointer text-xs"
+                    >
+                      <img
+                        src="/icons/google_cloud_storage.svg"
+                        alt="Google Cloud Storage"
+                        className="w-4 h-4 mr-2"
+                      />
                       Google Cloud Storage
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAddCredential('s3')} className="cursor-pointer text-xs">
+                    <DropdownMenuItem
+                      onClick={() => handleAddCredential('s3')}
+                      className="cursor-pointer text-xs"
+                    >
                       <img src="/icons/amazon_s3.svg" alt="Amazon S3" className="w-4 h-4 mr-2" />
                       Amazon S3
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAddCredential('cloudflare_r2')} className="cursor-pointer text-xs">
-                      <img src="/icons/cloudflare_r2.svg" alt="Cloudflare R2" className="w-4 h-4 mr-2" />
+                    <DropdownMenuItem
+                      onClick={() => handleAddCredential('cloudflare_r2')}
+                      className="cursor-pointer text-xs"
+                    >
+                      <img
+                        src="/icons/cloudflare_r2.svg"
+                        alt="Cloudflare R2"
+                        className="w-4 h-4 mr-2"
+                      />
                       Cloudflare R2
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAddCredential('digitalocean_spaces')} className="cursor-pointer text-xs">
-                      <img src="/icons/digitalocean_spaces.svg" alt="DigitalOcean Spaces" className="w-4 h-4 mr-2" />
+                    <DropdownMenuItem
+                      onClick={() => handleAddCredential('digitalocean_spaces')}
+                      className="cursor-pointer text-xs"
+                    >
+                      <img
+                        src="/icons/digitalocean_spaces.svg"
+                        alt="DigitalOcean Spaces"
+                        className="w-4 h-4 mr-2"
+                      />
                       DigitalOcean Spaces
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -294,12 +358,14 @@ export function SystemHealthPanel({ workerStatus: liveWorkerStatus }: SystemHeal
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => setDeleteCredential({
-                              id: storage.credentialId,
-                              name: storage.name,
-                              provider: storage.provider,
-                              status: storage.status,
-                            })}
+                            onClick={() =>
+                              setDeleteCredential({
+                                id: storage.credentialId,
+                                name: storage.name,
+                                provider: storage.provider,
+                                status: storage.status,
+                              })
+                            }
                             className="cursor-pointer text-xs"
                           >
                             <Trash2 className="mr-2 h-3 w-3" />

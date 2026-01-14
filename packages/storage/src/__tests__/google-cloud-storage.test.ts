@@ -134,11 +134,7 @@ describe('GoogleCloudStorageAdapter', () => {
     it('lists folders with prefix', async () => {
       await adapter.initialize(credentials)
 
-      mocks.getFiles.mockResolvedValue([
-        [],
-        null,
-        { prefixes: ['data/subdir1/', 'data/subdir2/'] },
-      ])
+      mocks.getFiles.mockResolvedValue([[], null, { prefixes: ['data/subdir1/', 'data/subdir2/'] }])
 
       const _folders = await adapter.listFolders('bucket-1', 'data')
 

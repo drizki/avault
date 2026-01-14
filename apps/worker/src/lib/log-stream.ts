@@ -135,7 +135,11 @@ export function createLogPublisher(historyId: string, userId: string) {
 /**
  * Publish a system-level log (not tied to a specific job)
  */
-export async function publishSystemLog(level: LogEvent['level'], message: string, metadata?: Record<string, unknown>) {
+export async function publishSystemLog(
+  level: LogEvent['level'],
+  message: string,
+  metadata?: Record<string, unknown>
+) {
   try {
     const event = {
       timestamp: new Date().toISOString(),
@@ -152,8 +156,12 @@ export async function publishSystemLog(level: LogEvent['level'], message: string
 }
 
 export const workerSystemLog = {
-  info: (message: string, metadata?: Record<string, unknown>) => publishSystemLog('info', message, metadata),
-  error: (message: string, metadata?: Record<string, unknown>) => publishSystemLog('error', message, metadata),
-  warn: (message: string, metadata?: Record<string, unknown>) => publishSystemLog('warn', message, metadata),
-  debug: (message: string, metadata?: Record<string, unknown>) => publishSystemLog('debug', message, metadata),
+  info: (message: string, metadata?: Record<string, unknown>) =>
+    publishSystemLog('info', message, metadata),
+  error: (message: string, metadata?: Record<string, unknown>) =>
+    publishSystemLog('error', message, metadata),
+  warn: (message: string, metadata?: Record<string, unknown>) =>
+    publishSystemLog('warn', message, metadata),
+  debug: (message: string, metadata?: Record<string, unknown>) =>
+    publishSystemLog('debug', message, metadata),
 }

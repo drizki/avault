@@ -198,9 +198,7 @@ describe('BackupScheduler', () => {
         name: 'Test Job',
       }
 
-      mocks.jobFindMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([mockJob])
+      mocks.jobFindMany.mockResolvedValueOnce([]).mockResolvedValueOnce([mockJob])
 
       mocks.acquireJobLock.mockResolvedValue(false)
 
@@ -219,9 +217,7 @@ describe('BackupScheduler', () => {
         name: 'Test Job',
       }
 
-      mocks.jobFindMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([mockJob])
+      mocks.jobFindMany.mockResolvedValueOnce([]).mockResolvedValueOnce([mockJob])
 
       mocks.acquireJobLock.mockResolvedValue(true)
       mocks.releaseJobLock.mockResolvedValue(undefined)
@@ -249,9 +245,7 @@ describe('BackupScheduler', () => {
         name: 'Test Job',
       }
 
-      mocks.jobFindMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([mockJob])
+      mocks.jobFindMany.mockResolvedValueOnce([]).mockResolvedValueOnce([mockJob])
 
       mocks.acquireJobLock.mockResolvedValue(true)
       mocks.releaseJobLock.mockResolvedValue(undefined)
@@ -279,9 +273,7 @@ describe('BackupScheduler', () => {
         retentionCount: 5,
       }
 
-      mocks.jobFindMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([mockJob])
+      mocks.jobFindMany.mockResolvedValueOnce([]).mockResolvedValueOnce([mockJob])
 
       mocks.acquireJobLock.mockResolvedValue(true)
       mocks.releaseJobLock.mockResolvedValue(undefined)
@@ -344,9 +336,7 @@ describe('BackupScheduler', () => {
 
       mocks.jobFindMany.mockResolvedValue(mockJobs)
       mocks.getNextRunTime.mockReturnValue(new Date())
-      mocks.jobUpdate
-        .mockResolvedValueOnce({})
-        .mockRejectedValueOnce(new Error('Update failed'))
+      mocks.jobUpdate.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('Update failed'))
 
       const testScheduler = new BackupScheduler(mockDb, mockRedis, 60000)
       await testScheduler['recalculateAllSchedules']()

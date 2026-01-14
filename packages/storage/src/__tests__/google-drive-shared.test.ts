@@ -133,7 +133,9 @@ describe('GoogleDriveSharedAdapter', () => {
 
   describe('createSharedDrive()', () => {
     it('throws error if not initialized', async () => {
-      await expect(adapter.createSharedDrive('Test Drive')).rejects.toThrow('Adapter not initialized')
+      await expect(adapter.createSharedDrive('Test Drive')).rejects.toThrow(
+        'Adapter not initialized'
+      )
     })
 
     it('creates a new shared drive', async () => {
@@ -176,7 +178,12 @@ describe('GoogleDriveSharedAdapter', () => {
       mocks.filesList.mockResolvedValue({
         data: {
           files: [
-            { id: 'folder-1', name: 'Backups', createdTime: '2024-01-15T10:00:00Z', modifiedTime: '2024-01-15T12:00:00Z' },
+            {
+              id: 'folder-1',
+              name: 'Backups',
+              createdTime: '2024-01-15T10:00:00Z',
+              modifiedTime: '2024-01-15T12:00:00Z',
+            },
             { id: 'folder-2', name: 'Archives', createdTime: '2024-01-14T10:00:00Z' },
           ],
         },
@@ -211,7 +218,9 @@ describe('GoogleDriveSharedAdapter', () => {
 
   describe('createFolder()', () => {
     it('throws error if not initialized', async () => {
-      await expect(adapter.createFolder('drive-1', 'New Folder')).rejects.toThrow('Adapter not initialized')
+      await expect(adapter.createFolder('drive-1', 'New Folder')).rejects.toThrow(
+        'Adapter not initialized'
+      )
     })
 
     it('creates a folder in destination root', async () => {
@@ -272,7 +281,9 @@ describe('GoogleDriveSharedAdapter', () => {
 
   describe('deleteFolder()', () => {
     it('throws error if not initialized', async () => {
-      await expect(adapter.deleteFolder('drive-1', 'folder-name')).rejects.toThrow('Adapter not initialized')
+      await expect(adapter.deleteFolder('drive-1', 'folder-name')).rejects.toThrow(
+        'Adapter not initialized'
+      )
     })
 
     it('deletes a folder by name', async () => {
@@ -298,7 +309,9 @@ describe('GoogleDriveSharedAdapter', () => {
 
       mocks.filesList.mockResolvedValue({ data: { files: [] } })
 
-      await expect(adapter.deleteFolder('drive-1', 'NonExistent')).rejects.toThrow('Folder not found: NonExistent')
+      await expect(adapter.deleteFolder('drive-1', 'NonExistent')).rejects.toThrow(
+        'Folder not found: NonExistent'
+      )
     })
   })
 
@@ -313,7 +326,12 @@ describe('GoogleDriveSharedAdapter', () => {
       mocks.filesList.mockResolvedValue({
         data: {
           files: [
-            { id: 'backup-1', name: 'backup-2024-01-15', createdTime: '2024-01-15T10:00:00Z', size: '1024' },
+            {
+              id: 'backup-1',
+              name: 'backup-2024-01-15',
+              createdTime: '2024-01-15T10:00:00Z',
+              size: '1024',
+            },
             { id: 'backup-2', name: 'backup-2024-01-14', createdTime: '2024-01-14T10:00:00Z' },
           ],
         },
@@ -361,13 +379,17 @@ describe('GoogleDriveSharedAdapter', () => {
     it('throws not implemented error', async () => {
       await adapter.initialize(credentials)
 
-      await expect(adapter.renameFolder('drive-1', 'old-name', 'new-name')).rejects.toThrow('Rename not implemented for Google Drive Shared')
+      await expect(adapter.renameFolder('drive-1', 'old-name', 'new-name')).rejects.toThrow(
+        'Rename not implemented for Google Drive Shared'
+      )
     })
   })
 
   describe('preBuildFolderStructure()', () => {
     it('throws error if not initialized', async () => {
-      await expect(adapter.preBuildFolderStructure('drive-1', 'root-id', 'root-name', ['a/b.txt'])).rejects.toThrow('Adapter not initialized')
+      await expect(
+        adapter.preBuildFolderStructure('drive-1', 'root-id', 'root-name', ['a/b.txt'])
+      ).rejects.toThrow('Adapter not initialized')
     })
 
     it('pre-builds folder structure for file paths', async () => {

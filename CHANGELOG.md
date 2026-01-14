@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.0-alpha.1] - 2025-01-14
+
+### Added
+
+- **Alpha Release**: Initial alpha version for production testing
+- All features from [0.1.0] are included
+- This is a pre-release version for testing and validation
+
+### Note
+
+This is an alpha release. It includes all core functionality but is intended for testing purposes before the final 0.1.0 release. Please report any issues on GitHub.
+
 ## [0.1.0] - 2025-01-14
 
 ### Added
@@ -135,5 +147,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-root container users
 - Encrypted token storage with IV and auth tag
 
-[Unreleased]: https://github.com/drizki/avault/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/drizki/avault/compare/v0.1.0-alpha.1...HEAD
+[0.1.0-alpha.1]: https://github.com/drizki/avault/compare/v0.1.0...v0.1.0-alpha.1
 [0.1.0]: https://github.com/drizki/avault/releases/tag/v0.1.0

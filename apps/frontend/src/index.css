@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Grafana-inspired dark theme with orange/yellow brand */
+    --background: 228 6% 8%;           /* #111217 */
+    --foreground: 220 3% 85%;          /* #d8d9da */
+
+    /* Panel backgrounds */
+    --card: 220 8% 11%;                /* #181b1f */
+    --card-foreground: 220 3% 85%;
+
+    /* Popovers */
+    --popover: 220 8% 11%;
+    --popover-foreground: 220 3% 85%;
+
+    /* Orange as primary action color */
+    --primary: 27 100% 50%;            /* #FF7700 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary with Grafana gray */
+    --secondary: 220 8% 15%;
+    --secondary-foreground: 220 3% 85%;
+
+    /* Muted backgrounds */
+    --muted: 220 5% 20%;
+    --muted-foreground: 0 0% 56%;      /* #8e8e8e */
+
+    /* Yellow accent */
+    --accent: 48 100% 50%;             /* #FFCC00 */
+    --accent-foreground: 0 0% 0%;
+
+    /* Destructive (red) */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders - Grafana style */
+    --border: 210 6% 23%;              /* #343a40 */
+    --input: 210 6% 23%;
+    --ring: 27 100% 50%;               /* Orange ring */
+
+    /* No border radius - sharp edges */
+    --radius: 0rem;
+
+    /* Charts with orange/yellow tones */
+    --chart-1: 27 100% 50%;            /* #FF7700 */
+    --chart-2: 48 100% 50%;            /* #FFCC00 */
+    --chart-3: 38 100% 50%;            /* Orange-yellow */
+    --chart-4: 18 100% 50%;            /* Red-orange */
+    --chart-5: 58 100% 45%;            /* Yellow-green */
+
+    /* Status Colors - Semantic tokens */
+    --status-success: 142 71% 45%;     /* Green */
+    --status-warning: 38 92% 50%;      /* Amber/Orange */
+    --status-error: 0 84% 60%;         /* Red */
+    --status-info: 217 91% 60%;        /* Blue */
+
+    /* Job State Colors */
+    --job-running: 217 91% 60%;        /* Blue - scanning */
+    --job-uploading: 27 100% 50%;      /* Orange - brand color */
+    --job-rotating: 271 81% 56%;       /* Purple - cleanup */
+    --job-pending: 220 9% 46%;         /* Gray */
+    --job-success: 142 71% 45%;        /* Green */
+    --job-failed: 0 84% 60%;           /* Red */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* Grafana-style scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Animation delays for staggered entrance */
+.animation-delay-0 { animation-delay: 0ms; }
+.animation-delay-50 { animation-delay: 50ms; }
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-150 { animation-delay: 150ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-250 { animation-delay: 250ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-350 { animation-delay: 350ms; }
+
+/* Ensure animations start from invisible */
+.animate-slide-up-fade,
+.animate-slide-down-fade {
+  opacity: 0;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up-fade,
+  .animate-slide-down-fade {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,276 @@
+// Avault - Backup Orchestration System
+// This schema supports multiple storage providers (Google Drive, S3, Dropbox, etc.)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// User Management and Authentication
+// ============================================================================
+
+// User accounts
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  avatarUrl     String?
+
+  // OAuth provider info
+  provider      String   @default("google")
+  providerId    String   // Google user ID
+
+  // Role-based access
+  role          UserRole @default(USER)
+
+  // Status
+  isActive      Boolean  @default(true)
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  credentials      StorageCredential[]
+  destinations     StorageDestination[]
+  backupJobs       BackupJob[]
+
+  @@unique([provider, providerId])
+  @@index([email])
+  @@index([role])
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+// System settings (key-value store for configuration)
+model SystemSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // JSON stringified value
+  updatedAt DateTime @updatedAt
+  updatedBy String?  // User ID who last updated
+
+  @@index([key])
+}
+
+// ============================================================================
+// Storage Management
+// ============================================================================
+
+// Storage provider credentials (OAuth tokens, API keys, etc.)
+model StorageCredential {
+  id        String   @id @default(cuid())
+
+  // Owner
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String   // User-friendly name (e.g., "My Google Drive Account")
+  provider  String   // "google_drive", "s3", "dropbox", etc.
+
+  // Encrypted credential data (JSON)
+  // For Google: { access_token, refresh_token, expiry }
+  // For S3: { access_key_id, secret_access_key, region }
+  encryptedData String
+  iv            String   // Initialization vector for AES-256-GCM
+  authTag       String   // Authentication tag for AES-256-GCM
+
+  // OAuth-specific fields (nullable for non-OAuth providers)
+  scopes    String?  // Space-separated OAuth scopes
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  destinations StorageDestination[]
+  backupJobs   BackupJob[]
+
+  @@index([provider])
+  @@index([userId])
+}
+
+// Remote storage destinations (Google Shared Drives, S3 buckets, etc.)
+model StorageDestination {
+  id         String   @id @default(cuid())
+
+  // Owner
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider   String   // "google_drive", "s3", "dropbox"
+
+  // Provider-specific identifier
+  // For Google Drive: Shared Drive ID
+  // For S3: Bucket name
+  remoteId   String
+
+  name       String   // Display name (e.g., "Company Shared Drive")
+
+  // Optional folder path within the destination
+  folderPath String?
+
+  credentialId String
+  credential   StorageCredential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  backupJobs BackupJob[]
+
+  @@unique([provider, remoteId, credentialId])
+  @@index([provider])
+  @@index([credentialId])
+  @@index([userId])
+}
+
+// Backup job configuration
+model BackupJob {
+  id          String   @id @default(cuid())
+
+  // Owner
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String   // User-friendly job name
+  description String?
+
+  // Source (local NAS path)
+  sourcePath  String
+
+  // Destination storage
+  destinationId String
+  destination   StorageDestination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  // Credential to use (for flexibility, though usually via destination)
+  credentialId String
+  credential   StorageCredential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+
+  // Schedule (cron expression: "minute hour day month weekday")
+  schedule    String
+
+  // Retention policy
+  retentionType  RetentionType
+  retentionCount Int?          // For VERSION_COUNT and HYBRID
+  retentionDays  Int?          // For DAYS and HYBRID
+
+  // Backup naming pattern (e.g., "backup-{date}-{hash}")
+  namePattern String @default("backup-{date}-{hash}")
+
+  // Status
+  enabled    Boolean  @default(true)
+  lastRunAt  DateTime?
+  nextRunAt  DateTime?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  history BackupHistory[]
+
+  @@index([destinationId])
+  @@index([credentialId])
+  @@index([enabled])
+  @@index([userId])
+}
+
+// Backup execution history
+model BackupHistory {
+  id        String   @id @default(cuid())
+
+  jobId     String
+  job       BackupJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  status    BackupStatus
+
+  // How was this job triggered?
+  triggerSource TriggerSource @default(MANUAL)
+
+  // Execution timeline
+  startedAt   DateTime
+  completedAt DateTime?
+
+  // Statistics
+  filesScanned    Int @default(0)
+  filesUploaded   Int @default(0)
+  filesFailed     Int @default(0)
+  bytesUploaded   BigInt @default(0)
+
+  // Remote backup folder/version identifier
+  remotePath String?
+
+  // Error information
+  errorMessage String?
+  errorStack   String?
+
+  // Metadata (JSON)
+  metadata String? // { uploadSpeed, duration, etc. }
+
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+// Log entries for backup operations
+model LogEntry {
+  id         String   @id @default(cuid())
+
+  // References
+  historyId  String?  // Nullable for system-level logs
+  userId     String   // Required for access control
+  jobId      String?  // Optional reference to backup job
+
+  // Log data
+  timestamp  DateTime @default(now())
+  level      LogLevel
+  message    String   @db.Text
+  metadata   Json?    // Additional context as JSON
+
+  // Retention
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime // Auto-calculated: createdAt + retention period
+
+  @@index([historyId, timestamp])
+  @@index([userId, timestamp])
+  @@index([expiresAt])
+  @@index([jobId])
+}
+
+// Enums
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+enum RetentionType {
+  VERSION_COUNT  // Keep N most recent versions
+  DAYS           // Keep backups from last N days
+  HYBRID         // Keep N versions AND anything newer than M days
+}
+
+enum BackupStatus {
+  PENDING         // Queued, waiting to start
+  RUNNING         // Scanning files
+  UPLOADING       // Uploading files
+  ROTATING        // Applying retention policy
+  SUCCESS         // Completed successfully
+  PARTIAL_SUCCESS // Completed with some errors
+  FAILED          // Failed completely
+  CANCELLED       // User cancelled
+}
+
+enum TriggerSource {
+  MANUAL          // User clicked "Run Now"
+  SCHEDULED       // Triggered by cron scheduler
+}

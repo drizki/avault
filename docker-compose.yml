@@ -1,0 +1,137 @@
+# Docker Compose for Avault
+# Usage: Copy .env.example to .env, fill in values, then run: docker compose up -d
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: avault-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-avault}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-avault}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-avault}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avault-network
+
+  # Redis for job queue
+  redis:
+    image: redis:7-alpine
+    container_name: avault-redis
+    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass ${REDIS_PASSWORD}}
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avault-network
+
+  # Backend API server
+  backend:
+    image: ghcr.io/drizki/avault-backend:${AVAULT_VERSION:-latest}
+    container_name: avault-backend
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avault}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-avault}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - avault-network
+
+  # Worker for backup jobs
+  worker:
+    image: ghcr.io/drizki/avault-worker:${AVAULT_VERSION:-latest}
+    container_name: avault-worker
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avault}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-avault}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+      NAS_MOUNT_PATH: /nas
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - ${NAS_MOUNT_PATH:-/mnt/nas}:/nas:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - avault-network
+
+  # Cleanup worker for log retention
+  cleanup-worker:
+    image: ghcr.io/drizki/avault-worker:${AVAULT_VERSION:-latest}
+    container_name: avault-cleanup-worker
+    command: ["node", "apps/worker/dist/cleanup-worker.js"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avault}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-avault}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      LOG_RETENTION_DAYS: ${LOG_RETENTION_DAYS:-30}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - avault-network
+
+  # Frontend (nginx serving static build)
+  frontend:
+    image: ghcr.io/drizki/avault-frontend:${AVAULT_VERSION:-latest}
+    container_name: avault-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - avault-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  avault-network:
+    name: avault-network

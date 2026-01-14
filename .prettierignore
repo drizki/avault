@@ -1,0 +1,22 @@
+# Build outputs
+dist/
+build/
+.turbo/
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Generated files
+*.gen.ts
+routeTree.gen.ts
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Coverage
+coverage/

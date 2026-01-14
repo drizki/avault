@@ -1,0 +1,54 @@
+# CodeRabbit AI Code Review Configuration
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en
+tone_instructions: "Be constructive and helpful. Focus on code quality, security, and best practices."
+early_access: false
+enable_free_tier: true
+
+reviews:
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  review_status: true
+  poem: false
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  path_instructions:
+    - path: "apps/backend/**"
+      instructions: |
+        Review for:
+        - Hono best practices
+        - Input validation with Zod
+        - Error handling
+        - Security (SQL injection, XSS, auth)
+        - Async/await patterns
+    - path: "apps/frontend/**"
+      instructions: |
+        Review for:
+        - React best practices
+        - Component composition
+        - State management
+        - Accessibility (a11y)
+        - Performance (memo, useCallback)
+    - path: "apps/worker/**"
+      instructions: |
+        Review for:
+        - BullMQ patterns
+        - Error handling and retries
+        - Resource cleanup
+        - Graceful shutdown
+    - path: "packages/shared/**"
+      instructions: |
+        Review for:
+        - Type safety
+        - Prisma schema design
+        - Zod schema validation
+        - API contracts
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: local

@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+coverage/
+.turbo/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE and editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts
+vitest.config.ts
+vitest.setup.ts
+
+# Development files
+.claude/
+.prettierignore
+.editorconfig
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Prisma SQLite (dev only)
+packages/shared/prisma/data/
+
+# Logs
+*.log
+npm-debug.log*

@@ -1,0 +1,148 @@
+# Docker Compose for building and testing Avault from source
+# Usage: docker compose -f docker-compose.dev.yml up --build
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: avault-dev-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-avault}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-avault}
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-avault}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avault-dev-network
+
+  # Redis for job queue
+  redis:
+    image: redis:7-alpine
+    container_name: avault-dev-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-dev-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avault-dev-network
+
+  # Backend API server (built from source)
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: avault-dev-backend
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avault}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-avault}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:4000/api/auth/callback/google}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - avault-dev-network
+
+  # Worker for backup jobs (built from source)
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    container_name: avault-dev-worker
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avault}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-avault}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+      NAS_MOUNT_PATH: /nas
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+    volumes:
+      - ${NAS_MOUNT_PATH:-./test-nas}:/nas:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - avault-dev-network
+
+  # Cleanup worker for log retention (built from source)
+  cleanup-worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    container_name: avault-dev-cleanup-worker
+    command: ["node", "apps/worker/dist/cleanup-worker.js"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avault}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-avault}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      LOG_RETENTION_DAYS: ${LOG_RETENTION_DAYS:-30}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - avault-dev-network
+
+  # Frontend (built from source, served by nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        VITE_API_URL: /api
+    container_name: avault-dev-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+    networks:
+      - avault-dev-network
+
+volumes:
+  postgres-dev-data:
+  redis-dev-data:
+
+networks:
+  avault-dev-network:
+    name: avault-dev-network

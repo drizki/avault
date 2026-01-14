@@ -258,10 +258,11 @@ auth.get('/callback/google', async (c) => {
     // Set httpOnly cookie
     setCookie(c, 'auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.COOKIE_SECURE === 'true',
       sameSite: 'Lax',
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: '/',
+      domain: process.env.COOKIE_DOMAIN || undefined,
     })
 
     // Redirect to frontend dashboard
@@ -279,6 +280,7 @@ auth.get('/callback/google', async (c) => {
 auth.post('/logout', (c) => {
   deleteCookie(c, 'auth_token', {
     path: '/',
+    domain: process.env.COOKIE_DOMAIN || undefined,
   })
 
   return c.json({

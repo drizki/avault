@@ -61,7 +61,7 @@ export function LogViewerSheet({ open, onOpenChange, historyId, jobName }: LogVi
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
-        const tokenResponse = await fetch(`${apiUrl}/api/auth/token`, {
+        const tokenResponse = await fetch(`${apiUrl}/auth/token`, {
           credentials: 'include',
         })
 
@@ -79,7 +79,7 @@ export function LogViewerSheet({ open, onOpenChange, historyId, jobName }: LogVi
         }
 
         const token = tokenData.data.token
-        const url = `${apiUrl}/api/logs/${historyId}?token=${encodeURIComponent(token)}&limit=${historicalLimit}`
+        const url = `${apiUrl}/logs/${historyId}?token=${encodeURIComponent(token)}&limit=${historicalLimit}`
 
         const eventSource = new EventSource(url)
         eventSourceRef.current = eventSource

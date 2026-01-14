@@ -127,7 +127,7 @@ export function useDashboardStream(): UseDashboardStreamReturn {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
       // Get auth token
-      const tokenResponse = await fetch(`${apiUrl}/api/auth/token`, {
+      const tokenResponse = await fetch(`${apiUrl}/auth/token`, {
         credentials: 'include',
       })
 
@@ -143,7 +143,7 @@ export function useDashboardStream(): UseDashboardStreamReturn {
       }
 
       const token = tokenData.data.token
-      const url = `${apiUrl}/api/dashboard/stream?token=${encodeURIComponent(token)}`
+      const url = `${apiUrl}/dashboard/stream?token=${encodeURIComponent(token)}`
 
       // Close existing connection if any
       if (eventSourceRef.current) {

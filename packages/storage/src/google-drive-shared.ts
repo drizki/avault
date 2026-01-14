@@ -164,8 +164,15 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
       return a.split('/').length - b.split('/').length
     })
 
+    console.log(`[preBuildFolderStructure] Building ${sortedPaths.length} folders...`)
+
     // Create directories in order (parents before children)
-    for (const dirPath of sortedPaths) {
+    let createdCount = 0
+    for (let i = 0; i < sortedPaths.length; i++) {
+      const dirPath = sortedPaths[i]
+      if (i % 10 === 0) {
+        console.log(`[preBuildFolderStructure] Progress: ${i}/${sortedPaths.length} folders processed`)
+      }
       const fullCacheKey = `${destinationId}:${rootFolderName}/${dirPath}`
       if (this.folderCache.has(fullCacheKey)) {
         continue // Already cached
@@ -216,10 +223,12 @@ export class GoogleDriveSharedAdapter extends StorageAdapter {
         })
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         folderId = newFolder.data.id!
+        createdCount++
       }
 
       this.folderCache.set(fullCacheKey, folderId)
     }
+    console.log(`[preBuildFolderStructure] Complete! Created ${createdCount} new folders, reused ${sortedPaths.length - createdCount} existing folders`)
   }
 
   /**

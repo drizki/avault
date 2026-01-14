@@ -62,6 +62,7 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
       NAS_MOUNT_PATH: /nas
+      TIMEZONE: ${TIMEZONE:-UTC}
     ports:
       - '${BACKEND_PORT:-4000}:4000'
     volumes:

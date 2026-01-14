@@ -3,7 +3,7 @@
 # ============================================
 # Stage 1: Build base with pnpm
 # ============================================
-FROM node:20-alpine AS base
+FROM node:25-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
@@ -36,7 +36,7 @@ RUN pnpm --filter @avault/worker build
 # ============================================
 # Stage 4: Production runtime
 # ============================================
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 RUN addgroup --system --gid 1001 avault && \

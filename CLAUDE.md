@@ -168,6 +168,15 @@ If any check fails, fix the issues before committing.
 - Keep commits focused and atomic
 - Tag releases with semver: `v1.0.0`
 
+### Pull Request Guidelines
+
+- **PR Title**: Use shortened conventional commit message as title
+  - Example: `fix: enforce strict TypeScript and resolve all build/lint issues`
+  - Format: `<type>: <short description>`
+- **PR Body**: Include detailed summary with sections explaining changes
+- Include test plan and verification results
+- Reference any related issues
+
 ## Security Considerations
 
 - Never commit `.env` files

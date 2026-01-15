@@ -3,7 +3,7 @@
 # ============================================
 # Stage 1: Build base with pnpm
 # ============================================
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
@@ -39,7 +39,7 @@ RUN pnpm --filter @avault/backend build
 # ============================================
 # Stage 4: Production runtime
 # ============================================
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 # Create non-root user
